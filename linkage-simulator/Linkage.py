@@ -3,6 +3,7 @@ from matplotlib.lines import Line2D
 import matplotlib.pyplot as plt
 from typing import Generator, TypeVar, List, Iterable, Final
 import math
+from .linkage_types import *
 
 class Linkage:
 
@@ -57,6 +58,9 @@ class Linkage:
             x += math.cos(ang) * l
             y += math.sin(ang) * l
             yield x, y
+
+    def last_endpoint(self):
+        return Linkage.Helpers.get_last(self.endpoints())
 
     class Helpers:
 

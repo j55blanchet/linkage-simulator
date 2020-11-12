@@ -1,46 +1,8 @@
-
-from math import sqrt
+from .linkage_types import *
 from matplotlib.lines import Line2D
-from .Linkage import Linkage
-from typing import Tuple, List
-import random
-from .PlotAnimator import PlotAnimator
-import numpy as np
+from math import sqrt
 
-Point2d = Tuple[float, float]
-
-class LinkageDriver:
-    def __init__(self, linkage: Linkage, target_provider) -> None:
-        self.linkage = linkage
-        self.ln_linkage = None
-        self.ln_target = None
-        self.target = (0, 0)
-        self.target_provider = target_provider
-
-    def get_plot_size(self) -> Tuple[float, float, float, float]:
-
-        buffer_percent = 0.10
-        link_maxlen = sum(self.linkage.links)
-
-        size = (1 + buffer_percent) * link_maxlen
-        return (-size, size, -size, size)
-
-
-    def update(self, frame: float):
-        spd = 0.01
-        for i in range(len(self.linkage.angles)):
-            self.linkage.angles[i] += spd * (-0.5 + random.random())
-
-        self.target = self.target_provider.get_target(frame)
-        
-
-    def plot(self, ax) -> Tuple[Line2D]:
-        self.ln_linkage = self.linkage.draw(ax, self.ln_linkage)
-        self.ln_target = self.target_provider.draw(ax, self.target, self.ln_target)
-        return self.ln_linkage, self.ln_target
-
-
-class PathFollower:
+class PathTargetProvider:
     def __init__(self, points: List[Point2d], loop: bool = True) -> None:
         
         if loop:
@@ -70,7 +32,7 @@ class PathFollower:
                 dl = l - l_sofar
                 seg_percent = dl / seg_length
                 
-                target = PathFollower.interpolate(
+                target = PathTargetProvider.interpolate(
                     self.points[i], 
                     self.points[i+1], 
                     seg_percent
@@ -99,14 +61,3 @@ class PathFollower:
         dx, dy = x2 - x1, y2 - y1
         return x1 + dx * t, y1 + dy * t
  
-
-
-if __name__ == "__main__":
-    linkage = Linkage([2, 1])
-    path_provider = PathFollower([(1.5, 1.5), (-1.5, 1.5), (-1.5, -1.5), (1.5, -1.5)])
-    driver = LinkageDriver(linkage, path_provider)
-    anim = PlotAnimator(driver, frames=np.linspace(0, 4, 30*8))
-    anim.run()
-
-
-    

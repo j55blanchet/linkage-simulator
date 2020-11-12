@@ -1,9 +1,9 @@
-# """
-# Simulates a Linkage
+"""
+Boilerplate for running interactive sketches.
 
-# Referenced Code:
-# - https://stackoverflow.com/questions/11874767/how-do-i-plot-in-real-time-in-a-while-loop-using-matplotlib
-# """
+Referenced Code:
+- https://stackoverflow.com/questions/11874767/how-do-i-plot-in-real-time-in-a-while-loop-using-matplotlib
+"""
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -30,7 +30,7 @@ class PlotAnimator:
         self.driver.update(frame)
         return self.driver.plot(self.ax)
 
-    def run(self):
+    def run(self, fps: int = 30):
 
         ani = FuncAnimation(
             self.fig, 
@@ -38,34 +38,32 @@ class PlotAnimator:
             frames=self.frames,
             init_func=self.setup, 
             blit=True,
-            interval=1000 // 30)
+            interval=1000 // fps)
         plt.show()
 
+# if __name__ == "__main__":
+#     class DummyController:
+#         def __init__(self) -> None:
+#             self.xdata = []
+#             self.ydata = []
+#             ln, = plt.plot([], [], 'ro')
+#             self.ln = ln
 
+#         def setup(self, sketch: Sketch):
+#             sketch.ax.set_xlim(0, 2*np.pi)
+#             sketch.ax.set_ylim(-1, 1)
+#             return self.ln,
 
-if __name__ == "__main__":
-    class DummyController:
-        def __init__(self) -> None:
-            self.xdata = []
-            self.ydata = []
-            ln, = plt.plot([], [], 'ro')
-            self.ln = ln
+#         def update(self, sketch: Sketch, frame):
+#             self.xdata.append(frame)
+#             self.ydata.append(np.sin(frame))
+#             self.ln.set_data(self.xdata, self.ydata)
 
-        def setup(self, sketch: Sketch):
-            sketch.ax.set_xlim(0, 2*np.pi)
-            sketch.ax.set_ylim(-1, 1)
-            return self.ln,
+#             # sketch.fig.gca().relim()
+#             # sketch.fig.gca().autoscale_view()
+#             return self.ln,
 
-        def update(self, sketch: Sketch, frame):
-            self.xdata.append(frame)
-            self.ydata.append(np.sin(frame))
-            self.ln.set_data(self.xdata, self.ydata)
-
-            # sketch.fig.gca().relim()
-            # sketch.fig.gca().autoscale_view()
-            return self.ln,
-
-    Sketch(DummyController()).run()
+#     Sketch(DummyController()).run()
 # ani = FuncAnimation(fig, update, init_func=init, blit=True, interval=100)
 # plt.show()
 
