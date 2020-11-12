@@ -1,6 +1,7 @@
 
+from matplotlib.lines import Line2D
 import matplotlib.pyplot as plt
-from typing import Generator, TypeVar, Iterable, Final
+from typing import Generator, TypeVar, List, Iterable, Final
 import math
 
 class Linkage:
@@ -27,11 +28,14 @@ class Linkage:
         x, y = Linkage.Helpers.get_last(self.endpoints())
         return x*x + y*y < Linkage.EQUALITY_THRESHOLD_SQUARED 
 
-    def draw(self):
+    def draw(self, ax, line: Line2D = None) -> List[Line2D]:
         # https://www.geeksforgeeks.org/python-unzip-a-list-of-tuples/
         x_cords, y_cords = tuple(zip(*self.endpoints()))
-        plt.plot(x_cords, y_cords, linestyle='solid')
-        plt.show()
+        if line is None:
+            return ax.plot(x_cords, y_cords, linestyle='solid')[0]
+
+        line.set_data(x_cords, y_cords)
+        return line
         
     def links_sequence(self):
         return zip(self.links, self.angles)
@@ -94,5 +98,5 @@ if __name__ == "__main__":
         (2, 1)
     ]
 
-    print("Test successful!")
+    
     
