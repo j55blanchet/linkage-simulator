@@ -10,7 +10,7 @@ def dist_squared(p1: Point2d, p2: Point2d):
 def dist(p1: Point2d, p2: Point2d):
     return sqrt(dist_squared(p1, p2))
 
-class LinageControllerInverseKinematics(LinkageController):
+class IKLinkageController(LinkageController):
 
     def __init__(self, tolerance: float = 1e-6) -> None:
         self.tolerance = tolerance

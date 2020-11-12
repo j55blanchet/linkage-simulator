@@ -6,12 +6,9 @@ from typing import Tuple
 
 from .Linkage import Linkage
 from .LinkageController import LinkageController
-from .LinkageControllerInverseKinematics import LinageControllerInverseKinematics
+from .IKLinkageController import IKLinkageController
 from .PlotAnimator import PlotAnimator
 from .PathTargetProvider import PathTargetProvider
-
-
-
 
 class LinkageDriver:
     def __init__(self, linkage: Linkage, target_provider, controller: LinkageController) -> None:
@@ -48,7 +45,7 @@ class LinkageDriver:
 if __name__ == "__main__":
     linkage = Linkage([2, 1])
     path_provider = PathTargetProvider([(1.5, 1.5), (-1.5, 1.5), (-1.5, -1.5), (1.5, -1.5)])
-    ik_controller = LinageControllerInverseKinematics()
+    ik_controller = IKLinkageController()
 
     driver = LinkageDriver(linkage, path_provider, ik_controller)
     
