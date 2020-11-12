@@ -7,17 +7,16 @@ from typing import Tuple
 from .Linkage import Linkage
 from .LinkageController import LinkageController
 from .IKLinkageController import IKLinkageController
-from .PlotAnimator import PlotAnimator
-from .PathTargetProvider import PathTargetProvider
+from .TargetProvider import TargetProvider
 
 class LinkageDriver:
-    def __init__(self, linkage: Linkage, target_provider, controller: LinkageController) -> None:
+    def __init__(self, linkage: Linkage, target_provider: TargetProvider, controller: LinkageController) -> None:
         self.linkage = linkage
         self.controller = controller
         self.ln_linkage = None
         self.ln_target = None
-        self.target = (0, 0)
         self.target_provider = target_provider
+        self.pframe = 0
 
     def get_plot_size(self) -> Tuple[float, float, float, float]:
 
@@ -29,28 +28,40 @@ class LinkageDriver:
 
 
     def update(self, frame: float):
+        dframe = frame - self.pframe
         spd = 0.01
         for i in range(len(self.linkage.angles)):
             self.linkage.angles[i] += spd * (-0.5 + random.random())
 
-        self.target = self.target_provider.get_target(frame)
-        self.controller.update(self.linkage, self.target)
+        self.target_provider.update_target(frame, dframe)
+        self.controller.update(self.linkage, self.target_provider._target)
+        self.pframe = frame
         
 
     def plot(self, ax) -> Tuple[Line2D]:
         self.ln_linkage = self.linkage.draw(ax, self.ln_linkage)
-        self.ln_target = self.target_provider.draw(ax, self.target, self.ln_target)
+        self.ln_target = self.target_provider.draw(ax, self.ln_target)
         return self.ln_linkage, self.ln_target
 
+    def button_clicked(self, x, y):
+        self.target_provider.button_clicked(x, y)
+
 if __name__ == "__main__":
+    from .PlotAnimator import PlotAnimator
+    # from .PathTargetProvider import PathTargetProvider
+    from .ClickTargetProvider import ClickTargetProvider
+
     linkage = Linkage([2, 1])
-    path_provider = PathTargetProvider([(1.5, 1.5), (-1.5, 1.5), (-1.5, -1.5), (1.5, -1.5)])
+    # path_provider = PathTargetProvider([(1.5, 1.5), (-1.5, 1.5), (-1.5, -1.5), (1.5, -1.5)])
+    path_provider = ClickTargetProvider()
     ik_controller = IKLinkageController()
 
     driver = LinkageDriver(linkage, path_provider, ik_controller)
-    
-    anim = PlotAnimator(driver, frames=np.linspace(0, 4, 30*8))
-    anim.run()
+
+    fps = 60
+    full_circle_time = 8
+    anim = PlotAnimator(driver, frames=np.linspace(0, 1, fps*full_circle_time))
+    anim.run(fps=fps)
 
 
     

@@ -1,8 +1,8 @@
-from .linkage_types import *
-from matplotlib.lines import Line2D
 from math import sqrt
 
-class PathTargetProvider:
+from .TargetProvider import *
+
+class PathTargetProvider(TargetProvider):
     def __init__(self, points: List[Point2d], loop: bool = True) -> None:
         
         if loop:
@@ -19,45 +19,32 @@ class PathTargetProvider:
         ]
 
         self.len_total = sum(self.lengths)
+        self._target = points[0]
 
-    def get_target(self, tt: float) -> Tuple[float, float]:
+    def update_target(self, tt: float, dt: float):
+
         t = tt % 1
-        
         l = t * self.len_total
-        
-
         l_sofar = 0
+
         for i, seg_length in enumerate(self.lengths):
             if l <= l_sofar + seg_length:
                 dl = l - l_sofar
                 seg_percent = dl / seg_length
                 
-                target = PathTargetProvider.interpolate(
+                self._target = TargetProvider.interpolate(
                     self.points[i], 
                     self.points[i+1], 
                     seg_percent
                 )
-                print(f"{tt:.2f}: {t:.2f} ==> {target}")
-                return target
+                return
 
             l_sofar += seg_length
 
-        return self.points[-1]
+        self._target = self.points[-1]
         
+    @property
+    def target(self) -> Point2d:
+        return self.target
     
-    def draw(self, ax, target: Point2d, line: Line2D = None):
-        x, y = target
-
-        if line is None:
-            return ax.plot([x], [y],  "ro", label="Target", marker='x')[0]
-        
-        line.set_data([x], [y])
-        return line
-
-    @staticmethod
-    def interpolate(p1: Point2d, p2: Point2d, t: float) -> Point2d:
-        x1, y1 = p1
-        x2, y2 = p2
-        dx, dy = x2 - x1, y2 - y1
-        return x1 + dx * t, y1 + dy * t
  

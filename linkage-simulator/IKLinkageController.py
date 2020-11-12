@@ -52,7 +52,8 @@ class IKLinkageController(LinkageController):
         # This ratio will be > 1 when the target is beyond 
         # the reach of the arms. So we clamp it to fully extended
         cos_ratio = min(1, cos_ratio) 
-
+        cos_ratio = max(-1, cos_ratio)
+        
         # Note - flipping the sign of cos_ratio will give us 
         #        an alternate solution
         theta2 = acos(cos_ratio)
