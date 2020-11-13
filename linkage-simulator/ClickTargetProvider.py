@@ -3,9 +3,9 @@ from .TargetProvider import *
 
 class ClickTargetProvider(TargetProvider):
 
-    def __init__(self) -> None:
-        self._target = (0, 0)
-        self.click_target = (0, 0)
+    def __init__(self, initial_target: Point2d = (0, 0)) -> None:
+        self._target = initial_target
+        self.click_target = initial_target
     
     def update_target(self, tt: float, dt: float):
         

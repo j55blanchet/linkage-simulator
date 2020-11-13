@@ -3,7 +3,10 @@ from matplotlib.lines import Line2D
 import matplotlib.pyplot as plt
 from typing import Generator, TypeVar, List, Iterable, Final
 import math
+import numpy as np
+
 from .linkage_types import *
+
 
 class Linkage:
 
@@ -14,9 +17,6 @@ class Linkage:
 
         self.links = tuple(link_sizes)
 
-        # There is always one less angle than link. In the event
-        # of closed linkages, the angle between the last linkage and the 0th
-        # must be inferred
         if link_angles is None:
             self.angles = [0.0 for _ in self.links]
         else:
@@ -62,6 +62,13 @@ class Linkage:
     def last_endpoint(self):
         return Linkage.Helpers.get_last(self.endpoints())
 
+    def __str__(self) -> str:
+        return f"Linkage: " + \
+            ",".join((
+                f"({l} @ {math.degrees(a)} deg)" 
+                for (l, a) in self.links_sequence()
+            ))
+
     class Helpers:
 
         T = TypeVar('T')
@@ -85,6 +92,33 @@ class Linkage:
             for val in gen:
                 last = val
             return last
+
+        @staticmethod
+        def dist_squared(p1: Point2d, p2: Point2d):
+            x1, y1 = p1
+            x2, y2 = p2
+            return (x2 - x1)**2 + (y2 - y1)**2
+
+        @staticmethod
+        def dist(p1: Point2d, p2: Point2d):
+            return math.sqrt(Linkage.Helpers.dist_squared(p1, p2))
+
+        @staticmethod
+        def vector(fromP: Point2d, to: Point2d):
+            x1, y1 = fromP
+            x2, y2 = to
+            return x2 - x1, y2 - y1
+
+        @staticmethod
+        def get_approach(fromP: Point2d, to: Point2d, max_d):
+            if Linkage.Helpers.dist_squared(fromP, to) < max_d**2:
+                return Linkage.Helpers.vector(fromP, to)
+            
+            v = np.array((1, 0))
+            v = v / np.linalg.norm(v)
+            v *= max_d
+            return v[0], v[1]
+            
 
     
 if __name__ == "__main__":

@@ -9,6 +9,12 @@
             "type": "python",
             "request": "launch",
             "module": "linkage-simulator.LinkageDriver"
+        },
+        {
+            "name": "Python: DifferentialKinematicOpenLinkageController",
+            "type": "python",
+            "request": "launch",
+            "module": "linkage-simulator.DifferentialKinematicOpenLinkageController"
         }
     ]
 }

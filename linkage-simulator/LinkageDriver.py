@@ -1,12 +1,13 @@
 
 from matplotlib.lines import Line2D
 import numpy as np
+import math
 import random
 from typing import Tuple
 
 from .Linkage import Linkage
 from .LinkageController import LinkageController
-from .IKLinkageController import IKLinkageController
+
 from .TargetProvider import TargetProvider
 
 class LinkageDriver:
@@ -29,12 +30,8 @@ class LinkageDriver:
 
     def update(self, frame: float):
         dframe = frame - self.pframe
-        spd = 0.01
-        for i in range(len(self.linkage.angles)):
-            self.linkage.angles[i] += spd * (-0.5 + random.random())
-
         self.target_provider.update_target(frame, dframe)
-        self.controller.update(self.linkage, self.target_provider._target)
+        self.controller.update(self.linkage, self.target_provider.target)
         self.pframe = frame
         
 
@@ -50,11 +47,13 @@ if __name__ == "__main__":
     from .PlotAnimator import PlotAnimator
     # from .PathTargetProvider import PathTargetProvider
     from .ClickTargetProvider import ClickTargetProvider
+    # from .IKLinkageController import IKLinkageController
+    from .DifferentialKinematicOpenLinkageController import DifferentialKinematicOpenLinkageController
 
-    linkage = Linkage([2, 1])
+    linkage = Linkage([2, 1], [0, math.radians(90)])
     # path_provider = PathTargetProvider([(1.5, 1.5), (-1.5, 1.5), (-1.5, -1.5), (1.5, -1.5)])
-    path_provider = ClickTargetProvider()
-    ik_controller = IKLinkageController()
+    path_provider = ClickTargetProvider(linkage.last_endpoint())
+    ik_controller = DifferentialKinematicOpenLinkageController()
 
     driver = LinkageDriver(linkage, path_provider, ik_controller)
 
