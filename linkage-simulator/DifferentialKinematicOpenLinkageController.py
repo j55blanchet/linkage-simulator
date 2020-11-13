@@ -8,7 +8,7 @@ from .linkage_types import *
 from .LinkageController import Linkage, LinkageController
 
 class DifferentialKinematicOpenLinkageController(LinkageController):
-    MAX_MOVEMENT = 0.05
+    MAX_MOVEMENT = 0.5
 
     def __init__(self) -> None:
         pass
@@ -22,7 +22,7 @@ class DifferentialKinematicOpenLinkageController(LinkageController):
         dx, dy = Linkage.Helpers.get_approach(
             fromP=linkage.last_endpoint(),
             to=target,
-            max_d=0.05
+            max_d=0.5
         )
         
         solution, residuals, rank, s = self.get_solution(linkage, dx, dy)

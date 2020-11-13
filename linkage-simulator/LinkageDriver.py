@@ -50,7 +50,7 @@ if __name__ == "__main__":
     # from .IKLinkageController import IKLinkageController
     from .DifferentialKinematicOpenLinkageController import DifferentialKinematicOpenLinkageController
 
-    linkage = Linkage([2, 1], [0, math.radians(30)])
+    linkage = Linkage([3, 2, 1, 1.5, 2], [0.123, 0, math.radians(30), math.radians(-30), 0])
     # path_provider = PathTargetProvider([(1.5, 1.5), (-1.5, 1.5), (-1.5, -1.5), (1.5, -1.5)])
     path_provider = ClickTargetProvider(linkage.last_endpoint())
     ik_controller = DifferentialKinematicOpenLinkageController()
