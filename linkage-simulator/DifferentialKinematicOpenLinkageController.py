@@ -8,7 +8,7 @@ from .linkage_types import *
 from .LinkageController import Linkage, LinkageController
 
 class DifferentialKinematicOpenLinkageController(LinkageController):
-    MAX_MOVEMENT = 0.5
+    MAX_MOVEMENT = 1e9
 
     def __init__(self) -> None:
         pass
@@ -22,7 +22,7 @@ class DifferentialKinematicOpenLinkageController(LinkageController):
         dx, dy = Linkage.Helpers.get_approach(
             fromP=linkage.last_endpoint(),
             to=target,
-            max_d=0.5
+            max_d=1e7
         )
         
         solution, residuals, rank, s = self.get_solution(linkage, dx, dy)
@@ -36,14 +36,6 @@ class DifferentialKinematicOpenLinkageController(LinkageController):
             solution = solution / solution_norm * DifferentialKinematicOpenLinkageController.MAX_MOVEMENT
         
         linkage.move_angles(solution)
-
-        # rank = np.linalg.matrix_rank(jacobian)
-
-        # if rank < 2:
-        #     print("Singular position reached")    
-        #     # TODO: get out of the singular position if possible?
-    
-        # return 
 
     def get_solution(self, linkage: Linkage, dx: float, dy: float):
         jacobian = self.compute_jacobian(linkage)

@@ -45,6 +45,6 @@ class PathTargetProvider(TargetProvider):
         
     @property
     def target(self) -> Point2d:
-        return self.target
+        return self._target
     
  

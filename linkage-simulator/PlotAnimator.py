@@ -38,7 +38,7 @@ class PlotAnimator:
         if e.xdata != None and e.ydata != None:
             self.driver.button_clicked(e.xdata, e.ydata)
 
-    def run(self, fps: int = 30):
+    def run(self, fps: int = 30, save_res: bool = False):
 
         connections = {
             # 'motion_notify_event': self.on_mouse_move,
@@ -61,3 +61,6 @@ class PlotAnimator:
 
         for cid in cids:
             self.fig.canvas.mpl_disconnect(cid)
+
+        if save_res:
+            ani.save("output.mp4")
