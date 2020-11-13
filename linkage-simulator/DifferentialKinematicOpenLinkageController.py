@@ -22,11 +22,14 @@ class DifferentialKinematicOpenLinkageController(LinkageController):
         dx, dy = Linkage.Helpers.get_approach(
             fromP=linkage.last_endpoint(),
             to=target,
-            max_d=0.02
+            max_d=0.05
         )
         
         solution, residuals, rank, s = self.get_solution(linkage, dx, dy)
         
+        if rank < 2:
+            print("ALERT! Singular config")
+
         solution_norm = np.linalg.norm(solution)
 
         if solution_norm > DifferentialKinematicOpenLinkageController.MAX_MOVEMENT:

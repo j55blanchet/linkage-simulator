@@ -114,7 +114,8 @@ class Linkage:
             if Linkage.Helpers.dist_squared(fromP, to) < max_d**2:
                 return Linkage.Helpers.vector(fromP, to)
             
-            v = np.array((1, 0))
+            dVector = Linkage.Helpers.vector(fromP, to)
+            v = np.array(dVector)
             v = v / np.linalg.norm(v)
             v *= max_d
             return v[0], v[1]
