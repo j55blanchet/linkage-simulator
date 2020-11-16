@@ -1,21 +1,13 @@
 from math import cos, sqrt, atan2, acos, sin
-
+import numpy as np
 from .LinkageController import *
-
-def dist_squared(p1: Point2d, p2: Point2d):
-    x1, y1 = p1
-    x2, y2 = p2
-    return (x2 - x1)**2 + (y2 - y1)**2
-
-def dist(p1: Point2d, p2: Point2d):
-    return sqrt(dist_squared(p1, p2))
 
 class IKLinkageController(LinkageController):
 
     def __init__(self, tolerance: float = 1e-6) -> None:
         self.tolerance = tolerance
 
-    def update(self, linkage: Linkage, target: Point2d):
+    def update(self, linkage: Linkage, target: np.array):
 
         if len(linkage.links) > 2:
             raise NotImplemented("InverseKinematics contorller can only work with 1R or 2R linkages.")
@@ -28,25 +20,23 @@ class IKLinkageController(LinkageController):
         angs = self.inverse_kinematics(linkage, target)
         linkage.set_angles(angs)
 
-    def meets_target(self, linkage: Linkage, target: Point2d) -> bool:
+    def meets_target(self, linkage: Linkage, target: np.array) -> bool:
         if len(linkage.links) > 2:
             raise NotImplemented("InverseKinematics contorller can only work with 1R or 2R linkages.")
 
-        tx, ty = target
+        
         end_point = linkage.last_endpoint()
-
-        return abs(dist_squared((0, 0), end_point)) < self.tolerance
+        return Linkage.Helpers.dist(end_point - target) < self.tolerance
 
     
-    def inverse_kinematics(self, linkage: Linkage, target: Point2d) -> Tuple[float, float]:
+    def inverse_kinematics(self, linkage: Linkage, target: np.array) -> Tuple[float, float]:
 
         assert len(linkage.links) == 2
 
-        x, y = target
         l1 = linkage.links[0]
         l2 = linkage.links[1]
 
-        A_squared = dist_squared((0, 0), target)
+        A_squared = np.linalg.norm(target) ** 2
         cos_ratio = (A_squared - l1**2 - l2**2) / (2 * l1 * l2)
 
         # This ratio will be > 1 when the target is beyond 
@@ -62,6 +52,8 @@ class IKLinkageController(LinkageController):
         theta2 = acos(cos_ratio)
 
         B = atan2(l2 * sin(theta2), l1 + l2 * cos(theta2))
+
+        x, y = target
         C = atan2(y, x)
 
         theta1 = C - B

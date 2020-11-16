@@ -57,7 +57,7 @@ class Linkage:
             ang += theta
             x += math.cos(ang) * l
             y += math.sin(ang) * l
-            yield x, y
+            yield np.array((x, y))
 
     def last_endpoint(self):
         return Linkage.Helpers.get_last(self.endpoints())
@@ -94,33 +94,8 @@ class Linkage:
             return last
 
         @staticmethod
-        def dist_squared(p1: Point2d, p2: Point2d):
-            x1, y1 = p1
-            x2, y2 = p2
-            return (x2 - x1)**2 + (y2 - y1)**2
-
-        @staticmethod
-        def dist(p1: Point2d, p2: Point2d):
-            return math.sqrt(Linkage.Helpers.dist_squared(p1, p2))
-
-        @staticmethod
-        def vector(fromP: Point2d, to: Point2d):
-            x1, y1 = fromP
-            x2, y2 = to
-            return x2 - x1, y2 - y1
-
-        @staticmethod
-        def get_approach(fromP: Point2d, to: Point2d, max_d):
-            if Linkage.Helpers.dist_squared(fromP, to) < max_d**2:
-                return Linkage.Helpers.vector(fromP, to)
-            
-            dVector = Linkage.Helpers.vector(fromP, to)
-            v = np.array(dVector)
-            v = v / np.linalg.norm(v)
-            v *= max_d
-            return v[0], v[1]
-            
-
+        def dist(p1: np.array, p2: np.array):
+            return np.linalg.norm(p1 - p2)
     
 if __name__ == "__main__":
 

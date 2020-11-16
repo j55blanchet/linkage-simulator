@@ -13,17 +13,9 @@ class DifferentialKinematicOpenLinkageController(LinkageController):
     def __init__(self) -> None:
         pass
 
-    def update(self, linkage: Linkage, target: Point2d):
+    def update(self, linkage: Linkage, target: np.array):
 
-        # lx, ly = linkage.last_endpoint()
-        # x, y = target
-        # dx, dy = x - lx, y - ly
-
-        dx, dy = Linkage.Helpers.get_approach(
-            fromP=linkage.last_endpoint(),
-            to=target,
-            max_d=1e7
-        )
+        dx, dy = target - linkage.last_endpoint()
         
         solution, residuals, rank, s = self.get_solution(linkage, dx, dy)
         
@@ -42,8 +34,8 @@ class DifferentialKinematicOpenLinkageController(LinkageController):
         dX = np.array((dx, dy))
         return np.linalg.lstsq(jacobian, dX, rcond=None) 
 
-    def meets_target(self, linkage: Linkage, target: Point2d) -> bool:
-        return Linkage.Helpers.dist_squared(linkage.last_endpoint(), target) < 1e-4
+    def meets_target(self, linkage: Linkage, target: np.array) -> bool:
+        return Linkage.Helpers.dist(linkage.last_endpoint(), target) < 1e-4
 
     def compute_jacobian(self, linkage: Linkage):
 

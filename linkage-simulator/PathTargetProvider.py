@@ -3,7 +3,7 @@ from math import sqrt
 from .TargetProvider import *
 
 class PathTargetProvider(TargetProvider):
-    def __init__(self, points: List[Point2d], loop: bool = True) -> None:
+    def __init__(self, points: List[np.array], loop: bool = True) -> None:
         
         if loop:
             points.append(points[0])

@@ -24,7 +24,7 @@ class LinkageDriver:
 
     def get_plot_size(self) -> Tuple[float, float, float, float]:
 
-        buffer_percent = 0.10
+        buffer_percent = 0.02
         link_maxlen = sum(self.linkage.links)
 
         size = (1 + buffer_percent) * link_maxlen
@@ -97,7 +97,7 @@ if __name__ == "__main__":
         frames = np.linspace(0, 1, fps * full_circle_time * 2)
         return driver, frames, True
 
-    def testcase_click(bars: int = 4):
+    def testcase_click(bars: int = 6):
         
         linkage = Linkage(
             link_sizes=[0.5 + 2 * random.random() for i in range(bars)], 
@@ -112,7 +112,7 @@ if __name__ == "__main__":
 
     
 
-    driver, frames, save_res = testcase_2()
+    driver, frames, save_res = testcase_click()
 
     
     anim = PlotAnimator(driver, frames=frames)
