@@ -112,7 +112,7 @@ if __name__ == "__main__":
 
     
 
-    driver, frames, save_res = testcase_click()
+    driver, frames, save_res = testcase_0()
 
     
     anim = PlotAnimator(driver, frames=frames)
