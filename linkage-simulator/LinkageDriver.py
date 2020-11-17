@@ -61,9 +61,25 @@ if __name__ == "__main__":
     fps = 30
     full_circle_time = 4
 
-    def testcase_0():
+    def testcase_2bar_ik():
         link = Linkage([1.3, 0.9], [0.1, 0.1])
         path_provider = PathTargetProvider([(1.5, 1.5), (-1.5, 1.5), (-1.5, -1.5), (1.5, -1.5)])
+        controller = IKLinkageController()
+        driver = LinkageDriver(link, path_provider, controller)
+        frames = np.linspace(0, 1, fps * full_circle_time)
+        return driver, frames, True
+
+    def testcase_2bar_diff():
+        link = Linkage([1.3, 0.9], [0.1, 0.1])
+        path_provider = PathTargetProvider([(1.5, 1.5), (-1.5, 1.5), (-1.5, -1.5), (1.5, -1.5)])
+        controller = DifferentialKinematicOpenLinkageController()
+        driver = LinkageDriver(link, path_provider, controller)
+        frames = np.linspace(0, 1, fps * full_circle_time)
+        return driver, frames, True
+    
+    def testcase_2bar_diff_click():
+        link = Linkage([1.3, 0.9], [0.1, 0.1])
+        path_provider = ClickTargetProvider(link.last_endpoint())
         controller = IKLinkageController()
         driver = LinkageDriver(link, path_provider, controller)
         frames = np.linspace(0, 1, fps * full_circle_time)
@@ -112,7 +128,7 @@ if __name__ == "__main__":
 
     
 
-    driver, frames, save_res = testcase_0()
+    driver, frames, save_res = testcase_click()
 
     
     anim = PlotAnimator(driver, frames=frames)
