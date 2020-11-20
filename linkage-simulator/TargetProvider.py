@@ -16,7 +16,7 @@ class TargetProvider(ABC):
     def update_target(self, tt: float, dt: float):
         pass
 
-    def draw(self, ax, line: Line2D = None):
+    def draw(self, ax, line: Line2D = None) -> Line2D:
         x, y = self.target
 
         if line is None:

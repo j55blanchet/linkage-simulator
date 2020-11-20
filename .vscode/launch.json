@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python: Module",
+            "name": "Python: LinkageSim",
             "type": "python",
             "request": "launch",
             "module": "linkage-simulator.LinkageDriver"
@@ -15,6 +15,12 @@
             "type": "python",
             "request": "launch",
             "module": "linkage-simulator.DifferentialKinematicOpenLinkageController"
+        },
+        {
+            "name": "Python: LinkageNetwork",
+            "type": "python",
+            "request": "launch",
+            "module": "linkage-simulator.LinkageNetwork"
         }
     ]
 }

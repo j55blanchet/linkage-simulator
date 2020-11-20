@@ -29,7 +29,7 @@ class Linkage:
         x, y = Linkage.Helpers.get_last(self.endpoints())
         return x*x + y*y < Linkage.EQUALITY_THRESHOLD_SQUARED 
 
-    def draw(self, ax, line: Line2D = None) -> List[Line2D]:
+    def draw(self, ax, line: Line2D = None) -> Line2D:
         # https://www.geeksforgeeks.org/python-unzip-a-list-of-tuples/
         x_cords, y_cords = tuple(zip(*self.endpoints()))
         if line is None:
