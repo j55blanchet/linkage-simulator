@@ -1,5 +1,8 @@
-from math import cos, sqrt, atan2, acos, sin
+from math import cos, atan2, acos, sin
+from typing import Tuple
+
 import numpy as np
+
 from .LinkageController import *
 
 class IKLinkageController(LinkageController):

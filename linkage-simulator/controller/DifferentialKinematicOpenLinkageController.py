@@ -4,7 +4,6 @@ from typing import Literal, Union
 import numpy as np
 from math import pi, sin, cos
 
-from .linkage_types import *
 from .LinkageController import Linkage, LinkageController
 
 class DifferentialKinematicOpenLinkageController(LinkageController):

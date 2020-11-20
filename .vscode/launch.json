@@ -8,19 +8,7 @@
             "name": "Python: LinkageSim",
             "type": "python",
             "request": "launch",
-            "module": "linkage-simulator.LinkageDriver"
-        },
-        {
-            "name": "Python: DifferentialKinematicOpenLinkageController",
-            "type": "python",
-            "request": "launch",
-            "module": "linkage-simulator.DifferentialKinematicOpenLinkageController"
-        },
-        {
-            "name": "Python: LinkageNetwork",
-            "type": "python",
-            "request": "launch",
-            "module": "linkage-simulator.LinkageNetwork"
+            "module": "linkage-simulator"
         }
     ]
 }

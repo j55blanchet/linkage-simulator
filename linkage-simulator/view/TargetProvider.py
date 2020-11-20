@@ -3,8 +3,6 @@ from abc import ABC, abstractmethod
 from matplotlib.lines import Line2D
 import numpy as np
 
-from .linkage_types import *
-
 class TargetProvider(ABC):
     
     @property

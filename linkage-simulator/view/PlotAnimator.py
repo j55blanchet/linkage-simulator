@@ -8,7 +8,8 @@ Referenced Code:
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
-from .LinkageDriver import LinkageDriver
+
+LinkageDriver = "LinkageDriver"
 
 class PlotAnimator:
     def __init__(self, driver: LinkageDriver, frames=None):

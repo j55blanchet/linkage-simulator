@@ -5,11 +5,10 @@ import numpy as np
 from matplotlib.lines import Line2D
 import matplotlib.collections
 
-NodeIndex = int
-
-DistanceConstraint = Tuple[NodeIndex, NodeIndex, float]
-
 class LinkageNetwork:
+
+    NodeIndex = int
+    DistanceConstraint = Tuple[NodeIndex, NodeIndex, float]
     
     def __init__(self, nodes: List[np.array], distance_constraints: List[DistanceConstraint]):
         

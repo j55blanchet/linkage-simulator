@@ -5,9 +5,6 @@ from typing import Generator, TypeVar, List, Iterable, Final
 import math
 import numpy as np
 
-from .linkage_types import *
-
-
 class Linkage:
 
     EQUALITY_THRESHOLD: float = 0.01
