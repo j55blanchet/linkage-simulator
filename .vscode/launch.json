@@ -9,6 +9,12 @@
             "type": "python",
             "request": "launch",
             "module": "linkage-simulator"
+        },
+        {
+            "name": "Python: ConstraintControllerTest",
+            "type": "python",
+            "request": "launch",
+            "module": "linkage-simulator.controller.ConstraintController"
         }
     ]
 }

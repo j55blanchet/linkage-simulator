@@ -6,7 +6,7 @@ from .controller import *
 from .view import *
 
 class LinkageDriver:
-    def __init__(self, linkage: LinkageModel, target_provider: TargetProvider, controller: LinkageController) -> None:
+    def __init__(self, linkage: Linkage, target_provider: TargetProvider, controller: LinkageController) -> None:
         self.linkage = linkage
         self.controller = controller
         self.ln_linkage = None
@@ -15,13 +15,7 @@ class LinkageDriver:
         self.pframe = 0
 
     def get_plot_size(self) -> Tuple[float, float, float, float]:
-
-        buffer_percent = 0.02
-        link_maxlen = sum(self.linkage.links)
-
-        size = (1 + buffer_percent) * link_maxlen
-        return (-size, size, -size, size)
-
+        return self.linkage.get_plot_bounds()
 
     def update(self, frame: float):
         dframe = frame - self.pframe
@@ -29,7 +23,6 @@ class LinkageDriver:
         self.controller.update(self.linkage, self.target_provider.target)
         self.pframe = frame
         
-
     def plot(self, ax) -> Tuple[Line2D]:
         self.ln_linkage = self.linkage.draw(ax, self.ln_linkage)
         self.ln_target = self.target_provider.draw(ax, self.ln_target)

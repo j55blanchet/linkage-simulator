@@ -4,7 +4,7 @@ from typing import Literal, Union
 import numpy as np
 from math import pi, sin, cos
 
-from .LinkageController import Linkage, LinkageController
+from .LinkageController import OpenLinkage, LinkageController
 
 class DifferentialKinematicOpenLinkageController(LinkageController):
     MAX_MOVEMENT = 1e9
@@ -12,7 +12,7 @@ class DifferentialKinematicOpenLinkageController(LinkageController):
     def __init__(self) -> None:
         pass
 
-    def update(self, linkage: Linkage, target: np.array):
+    def update(self, linkage: OpenLinkage, target: np.array):
 
         dx, dy = target - linkage.last_endpoint()
         
@@ -28,15 +28,15 @@ class DifferentialKinematicOpenLinkageController(LinkageController):
         
         linkage.move_angles(solution)
 
-    def get_solution(self, linkage: Linkage, dx: float, dy: float):
+    def get_solution(self, linkage: OpenLinkage, dx: float, dy: float):
         jacobian = self.compute_jacobian(linkage)
         dX = np.array((dx, dy))
         return np.linalg.lstsq(jacobian, dX, rcond=None) 
 
-    def meets_target(self, linkage: Linkage, target: np.array) -> bool:
-        return Linkage.Helpers.dist(linkage.last_endpoint(), target) < 1e-4
+    def meets_target(self, linkage: OpenLinkage, target: np.array) -> bool:
+        return OpenLinkage.Helpers.dist(linkage.last_endpoint(), target) < 1e-4
 
-    def compute_jacobian(self, linkage: Linkage):
+    def compute_jacobian(self, linkage: OpenLinkage):
 
         clinks = len(linkage.angles)
 
@@ -61,7 +61,7 @@ if __name__ == "__main__":
     controller = DifferentialKinematicOpenLinkageController()
 
     print("== Validating Jacobian ==")
-    link = Linkage(
+    link = OpenLinkage(
         link_sizes=[2,1],
         link_angles=[0, math.radians(90)]
     )
@@ -91,23 +91,23 @@ if __name__ == "__main__":
     print()
 
     test_linkages = [
-        ("Twobar Right Angle", Linkage(
+        ("Twobar Right Angle", OpenLinkage(
             link_sizes=[1,1], 
             link_angles=[0, pi / 2]
         )),
-        ("Twobar Straight Singular", Linkage(
+        ("Twobar Straight Singular", OpenLinkage(
             link_sizes=[1,1],
             link_angles=[0, 0]
         )),
-        ("Three Bar Straight Singular", Linkage(
+        ("Three Bar Straight Singular", OpenLinkage(
             link_sizes=[1,1,1],
             link_angles=[0,0,0]
         )),
-        ("Three Bar Semi Singular", Linkage(
+        ("Three Bar Semi Singular", OpenLinkage(
             link_sizes=[1,1,1],
             link_angles=[0, pi, 90]
         )),
-        ("Three Bar Non-Singular", Linkage(
+        ("Three Bar Non-Singular", OpenLinkage(
             link_sizes=[1,1,1],
             link_angles=[20, 20, 20]
         ))
@@ -125,7 +125,7 @@ if __name__ == "__main__":
 
     print()
     print("Twobar Right Angle - solving")
-    link = Linkage(
+    link = OpenLinkage(
         link_sizes=[1,1], 
         link_angles=[0, pi / 2]
     )
@@ -138,7 +138,7 @@ if __name__ == "__main__":
 
     print("\n")
     print("1 bar linkage-solving (straight up)")
-    link = Linkage(
+    link = OpenLinkage(
         link_sizes=[1],
         link_angles=[0]
     )

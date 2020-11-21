@@ -10,7 +10,7 @@ class IKLinkageController(LinkageController):
     def __init__(self, tolerance: float = 1e-6) -> None:
         self.tolerance = tolerance
 
-    def update(self, linkage: Linkage, target: np.array):
+    def update(self, linkage: OpenLinkage, target: np.array):
 
         if len(linkage.links) > 2:
             raise NotImplemented("InverseKinematics contorller can only work with 1R or 2R linkages.")
@@ -23,16 +23,16 @@ class IKLinkageController(LinkageController):
         angs = self.inverse_kinematics(linkage, target)
         linkage.set_angles(angs)
 
-    def meets_target(self, linkage: Linkage, target: np.array) -> bool:
+    def meets_target(self, linkage: OpenLinkage, target: np.array) -> bool:
         if len(linkage.links) > 2:
             raise NotImplemented("InverseKinematics contorller can only work with 1R or 2R linkages.")
 
         
         end_point = linkage.last_endpoint()
-        return Linkage.Helpers.dist(end_point - target) < self.tolerance
+        return OpenLinkage.Helpers.dist(end_point - target) < self.tolerance
 
     
-    def inverse_kinematics(self, linkage: Linkage, target: np.array) -> Tuple[float, float]:
+    def inverse_kinematics(self, linkage: OpenLinkage, target: np.array) -> Tuple[float, float]:
 
         assert len(linkage.links) == 2
 
