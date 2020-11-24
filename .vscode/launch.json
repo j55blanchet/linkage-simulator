@@ -15,6 +15,12 @@
             "type": "python",
             "request": "launch",
             "module": "linkage-simulator.controller.ConstraintController"
+        },
+        {
+            "name": "Python: LinkageNetworkTest",
+            "type": "python",
+            "request": "launch",
+            "module": "linkage-simulator.model.LinkageNetwork"
         }
     ]
 }

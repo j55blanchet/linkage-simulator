@@ -84,14 +84,110 @@ def testcase_constraint():
             (2, 3, 1),
             (3, 0, 1)
         ],
+        fixed_constraints=[
+            (0, (0, 0))
+        ],
         bounds=(-5, 6, -5, 6)
     )
 
-    path_provider = ClickTargetProvider((1, 1))
+    path_provider = ClickTargetProvider((0, 0))
     controller = ConstraintController()
     driver = LinkageDriver(linkage, path_provider, controller)
     return driver, None, False
 
-driver, frames, save_res = testcase_constraint()
+def testcase_constraint_8linkage():
+    # A "8" linkage
+    linkage = LinkageNetwork(
+        nodes= [
+            np.array([0, 0]),
+            np.array([1, 0]),
+            np.array([2, 0]),
+            np.array([2, 1]),
+            np.array([1, 1]),
+            np.array([0, 1])
+        ],
+        distance_constraints=[
+            (0, 1, 1),
+            (1, 2, 1),
+            (2, 3, 1),
+            (3, 4, 1),
+            (4, 5, 1),
+            (5, 0, 1),
+            (1, 4, 1)
+        ],
+        fixed_constraints=[
+            (2, (2, 0))
+        ],
+        bounds=(-2, 4, -2, 3)
+    )
+
+    path_provider = ClickTargetProvider((2, 0))
+    controller = ConstraintController()
+    driver = LinkageDriver(linkage, path_provider, controller)
+    return driver, 180, True
+
+def testcase_constraint_dynamicnetwork():
+        # A "8" linkage
+    linkage = LinkageNetwork(
+        nodes= [
+            np.array([0, 0]),   # 0
+            np.array([1, 0]),   # 1
+            np.array([4.5, 0]), # 2
+            np.array([2.5, 1]), # 3
+            np.array([3.5, 2]), # 4
+            np.array([1.1, 2]), # 5
+            np.array([0, 1.9]), # 6
+            np.array([0.8, 1.3])# 7
+        ],
+        distance_constraints=[
+            (0, 1, 1),
+            (1, 2, 1),
+            (2, 3, 1),
+            (3, 4, 1),
+            (4, 5, 1),
+            (5, 6, 1),
+            (6, 0, 1),
+            (0, 7, 1),
+            (4, 7, 1)
+        ],
+        fixed_constraints=[
+            (1, (1, 0))
+        ],
+        bounds=(-2, 7, -2, 4)
+    )
+
+    path_provider = ClickTargetProvider((1, 0))
+    controller = ConstraintController()
+    driver = LinkageDriver(linkage, path_provider, controller)
+    return driver, 180, True
+
+
+def test_rectification():
+    # Test rectification
+    network2 = LinkageNetwork(
+        nodes = [
+            np.array([0, 0]),
+            np.array([1, 0]),
+        ],
+        distance_constraints=[
+            (0, 1, 1)
+        ],
+        fixed_constraints=[
+            (0, (0, 0))
+        ],
+        bounds=(-4, 4, -4, 4)
+    )
+
+    # print("Before rectification:", network2.nodes)
+    # changes = network2.rectify()
+    # assert np.allclose(changes, [0, 0, 0, 0])
+
+    network2.distance_constraints[0] = (0, 1, 1.05)
+    changes = network2.rectify()
+    assert np.allclose(changes, np.array([[0], [0], [0.05], [0]]))
+    print("After rectification", network2.nodes)
+
+test = testcase_constraint_8linkage
+driver, frames, save_res = test()
 anim = PlotAnimator(driver, frames=frames)
-anim.run(fps=fps, save_res=False)
+anim.run(fps=fps, show=True, save=False, filename=test.__name__, repeat=False)

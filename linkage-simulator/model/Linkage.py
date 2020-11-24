@@ -1,8 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import Tuple
 
-
-
 class Linkage(ABC):
     Bounds = Tuple[float, float, float, float]
 
