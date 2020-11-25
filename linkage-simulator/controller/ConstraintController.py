@@ -4,16 +4,18 @@ import scipy.linalg
 from .LinkageController import *
 
 class ConstraintController(LinkageController):
+
     def update(self, linkage: Linkage, target: np.array):
         assert isinstance(linkage, LinkageNetwork)
         
         linkage.rectify()
+        self.move_randomly(linkage)
+        # self.project_onto_nullspace()
 
-        # TODO: Don't find nullspace. Set equal to current distance
-        #       error and set accordingly.
-        #   see: https://mail.python.org/pipermail/scipy-user/2009-May/021308.html
-        #  This could help us correct constraint errors while adjusting
-        #  the linkage simultaneously.
+    def get_action(self, linkage: LinkageNetwork, target: np.array):
+        pass
+
+    def move_randomly(self, linkage: LinkageNetwork):
         jacobian = linkage.constraint_jacobian()
         nullspace = scipy.linalg.null_space(jacobian)
 
@@ -25,15 +27,21 @@ class ConstraintController(LinkageController):
 
         action /= np.linalg.norm(action)
         action *= 0.05
-        
+        self.perform_action(linkage, action)
+
+    def perform_action(self, linkage: LinkageNetwork, action: np.array):
         assert len(action) == len(linkage.nodes) * 2
         for node_i in range(len(linkage.nodes)):
             dx = action[node_i * 2]
             dy = action[node_i * 2 + 1]
             linkage.nodes[node_i] += np.array((dx, dy))
-            # print(f"Node {node_i: 2}: {dx:+.6}, {dy:+.6}")
-
-        
+    
+    def project_onto_nullspace(self, linkage: LinkageNetwork, action: np.array):
+        # See: https://mail.python.org/pipermail/scipy-user/2009-May/021308.html
+        jacobian = linkage.constraint_jacobian()
+        nullspace = scipy.linalg.null_space(jacobian)
+        projected_action = nullspace * np.dot(nullspace, action[:,np.newaxis]).sum(axis=0)
+        return projected_action
 
     def meets_target(self, linkage: Linkage, target: np.array) -> bool:
         assert isinstance(linkage, LinkageNetwork)

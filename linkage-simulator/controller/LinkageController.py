@@ -1,7 +1,8 @@
 from abc import ABC, abstractmethod, abstractproperty
-from typing import Union
+from typing import List
 
 import numpy as np
+import matplotlib.artist
 
 from ..model import *
 
@@ -14,3 +15,6 @@ class LinkageController(ABC):
     @abstractmethod
     def meets_target(self, linkage: Linkage, target: np.array) -> bool:
         pass
+
+    def draw(self) -> List[matplotlib.artist.Artist]:
+        return []

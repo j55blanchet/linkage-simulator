@@ -187,7 +187,7 @@ def test_rectification():
     assert np.allclose(changes, np.array([[0], [0], [0.05], [0]]))
     print("After rectification", network2.nodes)
 
-test = testcase_constraint_8linkage
+test = testcase_constraint_dynamicnetwork
 driver, frames, save_res = test()
 anim = PlotAnimator(driver, frames=frames)
-anim.run(fps=fps, show=True, save=False, filename=test.__name__, repeat=False)
+anim.run(fps=fps, show=True, save=False, filename=test.__name__, repeat=True)
