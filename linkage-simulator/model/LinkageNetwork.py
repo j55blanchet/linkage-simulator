@@ -25,6 +25,9 @@ class LinkageNetwork(Linkage):
         self.fixed_constraints = fixed_constraints
         self.bounds = bounds
 
+        fixed_nodes = (i for i, _ in fixed_constraints)
+        self.fixed_nodes = set(fixed_nodes)
+
         # Sanity Check
         for node in nodes:
             assert len(node) == 2
@@ -79,6 +82,9 @@ class LinkageNetwork(Linkage):
                 return False
 
         return True
+
+    def is_fixed_node(self, node_index: int) -> bool:
+        return node_index in self.fixed_nodes
     
     @property
     def node_count(self) -> int:
