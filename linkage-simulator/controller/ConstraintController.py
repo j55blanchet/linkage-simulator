@@ -2,7 +2,6 @@
 import scipy.linalg
 import matplotlib.artist
 
-
 from .LinkageController import *
 
 class ConstraintController(LinkageController):
@@ -10,12 +9,26 @@ class ConstraintController(LinkageController):
     def update(self, linkage: Linkage, target: np.array):
         assert isinstance(linkage, LinkageNetwork)
         
-        linkage.rectify()
-        self.move_randomly(linkage)
+        action = self.get_action(linkage, target)
+        self.perform_action(linkage, action)
+
+        for i in range(4):
+            linkage.rectify()
+        # self.move_randomly(linkage)
         # self.project_onto_nullspace()
 
     def get_action(self, linkage: LinkageNetwork, target: np.array):
-        pass
+
+        # Find closest node to target
+        inode = min(range(linkage.node_count), key=lambda i: np.linalg.norm(linkage.nodes[i] - target))
+
+        # Move that node to the target
+        dx, dy = target - linkage.nodes[inode]
+        action = np.zeros(linkage.variable_count)
+        action[inode * 2] = dx
+        action[inode * 2 + 1] = dy
+        
+        return action
 
     def move_randomly(self, linkage: LinkageNetwork):
         jacobian = linkage.constraint_jacobian()

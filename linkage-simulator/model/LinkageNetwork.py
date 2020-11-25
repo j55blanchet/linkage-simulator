@@ -41,17 +41,23 @@ class LinkageNetwork(Linkage):
             for i, j, _ in self.distance_constraints
         ]
 
+        fixed = [loc for _, loc in self.fixed_constraints]
+
         if prev:
             prev[0].set_segments(segments)
             prev[1].set_offsets(self.nodes)
+            prev[2].set_offsets(fixed)
             return prev
 
-        coll = matplotlib.collections.LineCollection(segments)
-        ax.add_collection(coll)
+        lines_coll = matplotlib.collections.LineCollection(segments)
+        ax.add_collection(lines_coll)
 
         x, y = zip(*self.nodes)
-        plt2 = ax.scatter(x, y)
-        return coll, plt2
+        nodes_plt = ax.scatter(x, y)
+
+        fixed_x, fixed_y = zip(*fixed)
+        fixed_plt = ax.scatter(fixed_x, fixed_y)
+        return lines_coll, nodes_plt, fixed_plt
 
     def get_plot_bounds(self) -> Tuple[float, float, float, float]:
         return self.bounds
