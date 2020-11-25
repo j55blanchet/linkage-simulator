@@ -1,5 +1,7 @@
 
 import scipy.linalg
+import matplotlib.artist
+
 
 from .LinkageController import *
 
@@ -46,6 +48,9 @@ class ConstraintController(LinkageController):
     def meets_target(self, linkage: Linkage, target: np.array) -> bool:
         assert isinstance(linkage, LinkageNetwork)
         raise NotImplemented()
+
+    def draw(self, ax, cached) -> List[matplotlib.artist.Artist]:
+        return []
 
 if __name__ == "__main__":
     test_network = LinkageNetwork(

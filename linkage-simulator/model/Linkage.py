@@ -1,5 +1,8 @@
 from abc import ABC, abstractmethod
-from typing import Tuple
+from typing import Sequence, Tuple, Union
+
+import matplotlib.axes
+import matplotlib.artist
 
 class Linkage(ABC):
     Bounds = Tuple[float, float, float, float]
@@ -9,5 +12,9 @@ class Linkage(ABC):
         raise NotImplemented()
     
     @abstractmethod
-    def draw(self, ax, prev):
+    def draw(self, 
+             ax: matplotlib.axes.Axes, 
+             prev: Union[Sequence[matplotlib.artist.Artist], None]) \
+                -> Sequence[matplotlib.artist.Artist]:
+
         raise NotImplemented()

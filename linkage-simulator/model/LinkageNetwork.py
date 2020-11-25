@@ -1,8 +1,10 @@
 
-from typing import Tuple, List, Union
+from typing import Tuple, List, Union, Sequence
 
 import numpy as np
 import matplotlib.collections
+from matplotlib.artist import Artist
+from matplotlib.axes import Axes
 
 from .Linkage import Linkage
 
@@ -32,7 +34,7 @@ class LinkageNetwork(Linkage):
             assert i != j
             assert length > 0
 
-    def draw(self, ax, prev: matplotlib.collections.LineCollection):
+    def draw(self, ax: Axes, prev: Sequence[Artist]) -> Sequence[Artist]:
         
         segments = [
             (self.nodes[i], self.nodes[j]) 
@@ -40,12 +42,16 @@ class LinkageNetwork(Linkage):
         ]
 
         if prev:
-            prev.set_segments(segments)
+            prev[0].set_segments(segments)
+            prev[1].set_offsets(self.nodes)
             return prev
 
-        coll = matplotlib.collections.LineCollection(segments    )
+        coll = matplotlib.collections.LineCollection(segments)
         ax.add_collection(coll)
-        return coll
+
+        x, y = zip(*self.nodes)
+        plt2 = ax.scatter(x, y)
+        return coll, plt2
 
     def get_plot_bounds(self) -> Tuple[float, float, float, float]:
         return self.bounds

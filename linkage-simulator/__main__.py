@@ -188,6 +188,7 @@ def test_rectification():
     print("After rectification", network2.nodes)
 
 test = testcase_constraint_dynamicnetwork
+# test = testcase_2bar_ik
 driver, frames, save_res = test()
 anim = PlotAnimator(driver, frames=frames)
 anim.run(fps=fps, show=True, save=False, filename=test.__name__, repeat=True)

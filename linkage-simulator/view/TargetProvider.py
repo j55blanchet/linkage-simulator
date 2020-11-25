@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 
-from matplotlib.lines import Line2D
+import matplotlib.lines
+import matplotlib.axes
 import numpy as np
 
 class TargetProvider(ABC):
@@ -14,7 +15,7 @@ class TargetProvider(ABC):
     def update_target(self, tt: float, dt: float):
         pass
 
-    def draw(self, ax, line: Line2D = None) -> Line2D:
+    def draw(self, ax: matplotlib.axes.Axes, line: matplotlib.lines.Line2D = None) -> matplotlib.lines.Line2D:
         x, y = self.target
 
         if line is None:

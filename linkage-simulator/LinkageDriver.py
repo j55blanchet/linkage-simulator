@@ -11,6 +11,7 @@ class LinkageDriver:
         self.controller = controller
         self.ln_linkage = None
         self.ln_target = None
+        self.ln_controller = None
         self.target_provider = target_provider
         self.pframe = 0
 
@@ -26,7 +27,8 @@ class LinkageDriver:
     def plot(self, ax) -> Tuple[Line2D]:
         self.ln_linkage = self.linkage.draw(ax, self.ln_linkage)
         self.ln_target = self.target_provider.draw(ax, self.ln_target)
-        return self.ln_linkage, self.ln_target
+        self.ln_controller = self.controller.draw(ax, self.ln_controller)
+        return (*self.ln_linkage, self.ln_target, *self.ln_controller)
 
     def button_clicked(self, x, y):
         self.target_provider.button_clicked(x, y)

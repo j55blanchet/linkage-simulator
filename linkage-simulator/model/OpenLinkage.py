@@ -1,7 +1,11 @@
+from typing import Generator, TypeVar, Iterable, Final, Tuple, Sequence
 
+import matplotlib
+from matplotlib.artist import Artist
 from matplotlib.lines import Line2D
+from matplotlib.axes import Axes
 import matplotlib.pyplot as plt
-from typing import Generator, TypeVar, Iterable, Final, Tuple
+
 import math
 import numpy as np
 
@@ -28,13 +32,13 @@ class OpenLinkage(Linkage):
         x, y = OpenLinkage.Helpers.get_last(self.endpoints())
         return x*x + y*y < OpenLinkage.EQUALITY_THRESHOLD_SQUARED 
 
-    def draw(self, ax, prev: Line2D = None) -> Line2D:
+    def draw(self, ax: Axes, prev: Sequence[Line2D] = None) -> Sequence[Artist]:
         # https://www.geeksforgeeks.org/python-unzip-a-list-of-tuples/
         x_cords, y_cords = tuple(zip(*self.endpoints()))
         if prev is None:
-            return ax.plot(x_cords, y_cords, linestyle='solid')[0]
+            return ax.plot(x_cords, y_cords, linestyle='solid')
 
-        prev.set_data(x_cords, y_cords)
+        prev[0].set_data(x_cords, y_cords)
         return prev
         
     def links_sequence(self):
