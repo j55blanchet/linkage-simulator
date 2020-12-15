@@ -283,7 +283,8 @@ def test_nullspace_projection():
 # test = test_nullspace_projection
 # test = testcase_2bar_ik
 test = testcase_2bar_constraint
+print(test.__name__)
 # test = testcase_constraint_dynamicnetwork
 driver, frames, save_res = test()
 anim = PlotAnimator(driver, frames=frames)
-anim.run(fps=fps, show=False, save=True, filename=test.__name__, repeat=True)
+anim.run(fps=fps, show=True, save=False, filename=test.__name__, repeat=True)
