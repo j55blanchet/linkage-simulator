@@ -26,11 +26,13 @@ class PlotAnimator:
         self.ax.set_xlim(x_min, x_max) 
         self.ax.set_ylim(y_min, y_max)
 
-        return self.driver.plot(self.ax)
+        artists = self.driver.plot(self.ax)
+        return artists
 
     def update(self, frame):
         self.driver.update(frame)
-        return self.driver.plot(self.ax)
+        artists = self.driver.plot(self.ax)
+        return artists
 
     def on_mouse_move(self, e):
         print(e)

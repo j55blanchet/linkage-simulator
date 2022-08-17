@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from typing import Tuple
 
 import matplotlib.lines
 import matplotlib.axes
@@ -15,14 +16,14 @@ class TargetProvider(ABC):
     def update_target(self, tt: float, dt: float):
         pass
 
-    def draw(self, ax: matplotlib.axes.Axes, line: matplotlib.lines.Line2D = None) -> matplotlib.lines.Line2D:
+    def draw(self, ax: matplotlib.axes.Axes, lines: Tuple[matplotlib.lines.Line2D] = None) -> Tuple[matplotlib.lines.Line2D]:
         x, y = self.target
 
-        if line is None:
-            return ax.plot([x], [y],  "ro", label="Target", marker='x')[0]
+        if lines is None:
+            return ax.plot([x], [y],  "ro", label="Target", marker='x')
         
-        line.set_data([x], [y])
-        return line
+        lines[0].set_data([x], [y])
+        return lines
 
     def button_clicked(self, mouse_x: float, mouse_y: float):
         pass

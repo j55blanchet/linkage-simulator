@@ -31,7 +31,7 @@ class LinkageDriver(DriverBase):
         self.ln_linkage = self.linkage.draw(ax, self.ln_linkage)
         self.ln_target = self.target_provider.draw(ax, self.ln_target)
         self.ln_controller = self.controller.draw(ax, self.ln_controller)
-        return (*self.ln_linkage, self.ln_target, *self.ln_controller)
+        return (*self.ln_linkage, *self.ln_target, *self.ln_controller)
 
     def mouse_pressed(self, x, y, e):
         print(f"Button Click: {x}, {y}")
