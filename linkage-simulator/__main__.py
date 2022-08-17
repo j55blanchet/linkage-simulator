@@ -4,7 +4,7 @@ import math
 
 import numpy as np
 
-from .LinkageDriver import *
+from .drivers.LinkageDriver import *
 
 fps = 30
 full_circle_time = 4

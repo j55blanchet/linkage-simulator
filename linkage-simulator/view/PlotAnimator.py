@@ -8,11 +8,11 @@ Referenced Code:
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
-
+from ..drivers.DriverBase import DriverBase
 LinkageDriver = "LinkageDriver"
 
 class PlotAnimator:
-    def __init__(self, driver: LinkageDriver, frames=None):
+    def __init__(self, driver: DriverBase, frames=None):
         self.driver = driver
         self.frames = frames
 
@@ -35,15 +35,24 @@ class PlotAnimator:
     def on_mouse_move(self, e):
         print(e)
 
-    def on_mouse_click(self, e):
+    def on_mouse_press(self, e):
         if e.xdata != None and e.ydata != None:
-            self.driver.button_clicked(e.xdata, e.ydata)
+            self.driver.mouse_pressed(e.xdata, e.ydata, e)
+
+    def on_mouse_move(self, e):
+        if e.xdata != None and e.ydata != None:
+            self.driver.mouse_moved(e.xdata, e.ydata, e)
+    
+    def on_mouse_release(self, e):
+        if e.xdata != None and e.ydata != None:
+            self.driver.mouse_released(e.xdata, e.ydata, e)
 
     def run(self, fps: int = 30, show: bool = True, save: bool = False, filename: str = "output", repeat=True):
 
         connections = {
-            # 'motion_notify_event': self.on_mouse_move,
-            'button_press_event': self.on_mouse_click
+            'motion_notify_event': self.on_mouse_move,
+            'button_press_event': self.on_mouse_press,
+            'button_release_event': self.on_mouse_release,
         }
 
         cids = [

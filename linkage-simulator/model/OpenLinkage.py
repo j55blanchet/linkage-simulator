@@ -32,9 +32,9 @@ class OpenLinkage(Linkage):
         x, y = OpenLinkage.Helpers.get_last(self.endpoints())
         return x*x + y*y < OpenLinkage.EQUALITY_THRESHOLD_SQUARED 
 
-    def draw(self, ax: Axes, prev: Sequence[Line2D] = None) -> Sequence[Artist]:
+    def draw(self, ax: Axes, prev: Sequence[Line2D] = None, offset: Tuple[float, float] = (0.0, 0.0)) -> Sequence[Artist]:
         # https://www.geeksforgeeks.org/python-unzip-a-list-of-tuples/
-        x_cords, y_cords = tuple(zip(*self.endpoints()))
+        x_cords, y_cords = tuple(zip(*self.endpoints(offset)))
         if prev is None:
             return ax.plot(x_cords, y_cords, linestyle='solid')
 
@@ -53,8 +53,9 @@ class OpenLinkage(Linkage):
         for i in range(len(angle_changes)):
             self.angles[i] += angle_changes[i]
 
-    def endpoints(self):
-        x, y, ang = 0.0, 0.0, 0.0
+    def endpoints(self, origin: Tuple[float, float] = (0.0, 0.0), start_angle=0.0) -> Generator[Tuple[float, float], None, None]:
+        x, y = origin
+        ang = start_angle
         yield x, y
         for l, theta in self.links_sequence():
             ang += theta
@@ -70,6 +71,10 @@ class OpenLinkage(Linkage):
         link_maxlen = sum(self.links)
         size = (1 + buffer_percent) * link_maxlen
         return (-size, size, -size, size)
+
+    @property
+    def length(self) -> float:
+        return sum(self.links)
 
     def __str__(self) -> str:
         return f"Linkage: " + \

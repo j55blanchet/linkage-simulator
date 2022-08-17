@@ -21,6 +21,12 @@
             "type": "python",
             "request": "launch",
             "module": "linkage-simulator.model.LinkageNetwork"
+        },
+        {
+            "name": "Python: RetargetingDriverTest",
+            "type": "python",
+            "request": "launch",
+            "module": "linkage-simulator.drivers.RetargetingDriver"
         }
     ]
 }

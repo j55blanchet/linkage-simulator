@@ -1,11 +1,13 @@
-from matplotlib.lines import Line2D
 from typing import Tuple
 
-from .model import *
-from .controller import *
-from .view import *
+from matplotlib.lines import Line2D
 
-class LinkageDriver:
+from ..model import *
+from ..controller import *
+from ..view import *
+from .DriverBase import DriverBase
+
+class LinkageDriver(DriverBase):
     def __init__(self, linkage: Linkage, target_provider: TargetProvider, controller: LinkageController) -> None:
         self.linkage = linkage
         self.controller = controller
@@ -31,7 +33,7 @@ class LinkageDriver:
         self.ln_controller = self.controller.draw(ax, self.ln_controller)
         return (*self.ln_linkage, self.ln_target, *self.ln_controller)
 
-    def button_clicked(self, x, y):
+    def mouse_pressed(self, x, y, e):
         print(f"Button Click: {x}, {y}")
         self.target_provider.button_clicked(x, y)
 
