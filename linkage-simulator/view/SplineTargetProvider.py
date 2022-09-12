@@ -13,6 +13,7 @@ class SplineTargetProvider(TargetProvider):
         self.targets_y = []
         self.click_target = initial_target
         self.spline_fn = None
+        self.target_trajectory: np.ndarray = np.array([(np.inf, np.inf)])
     
     def update_target(self, tt: float, dt: float):
 
@@ -33,6 +34,13 @@ class SplineTargetProvider(TargetProvider):
                 np.c_[splinefn_xs, splinefn_ys]
             )
 
+            splinefn_x = \
+                np.linspace(0, len(self.targets_x), len(self.targets_x) * 3)
+            xys = self.spline_fn(splinefn_x) \
+                    if self.spline_fn is not None\
+                    else np.array([[0, 0]])
+            self.target_trajectory = xys
+
     
     def draw(self, ax: matplotlib.axes.Axes, lines: Tuple[matplotlib.lines.Line2D] = None, offset: Tuple[float, float] = (0.0, 0.0)) -> Tuple[matplotlib.lines.Line2D]:
 
@@ -51,11 +59,7 @@ class SplineTargetProvider(TargetProvider):
         artists.append(target_dots)
 
 
-        splinefn_x = np.linspace(0, len(self.targets_x), len(self.targets_x) * 20)
-        xys = self.spline_fn(splinefn_x) \
-                    if self.spline_fn is not None\
-                    else np.array([[0, 0]])
-        xys = xys + offset
+        xys = self.target_trajectory + offset
         if lines is None or len(lines) < 2:
             spline_line = ax.plot(xys[:, 0], xys[:, 1])[0]
         else:

@@ -9,44 +9,56 @@ import matplotlib.pyplot as plt
 import math
 import numpy as np
 
-from .Linkage import Linkage
+from .Linkage import Linkage, LinkageTrajectory
 
 class OpenLinkage(Linkage):
 
     EQUALITY_THRESHOLD: float = 0.01
     EQUALITY_THRESHOLD_SQUARED: float = 0.01 * 0.01
     
-    def __init__(self, link_sizes: Iterable[float], link_angles: Iterable[float]=None) -> None:
+    def __init__(
+        self, 
+        link_sizes: Iterable[float], 
+        link_angles: Iterable[float]=None) -> None:
 
         self.links = tuple(link_sizes)
-
+        
         if link_angles is None:
             self.angles = [0.0 for _ in self.links]
         else:
             self.angles = list(link_angles)
             assert len(link_angles) == len(self.links)
-
+        
         assert len(self.links) > 0
     
     def is_closed(self) -> bool:
         x, y = OpenLinkage.Helpers.get_last(self.endpoints())
         return x*x + y*y < OpenLinkage.EQUALITY_THRESHOLD_SQUARED 
 
-    def draw(self, ax: Axes, prev: Sequence[Line2D] = None, offset: Tuple[float, float] = (0.0, 0.0)) -> Sequence[Artist]:
+    def draw(self, ax: Axes, prev: Sequence[Line2D] = None, offset: Tuple[float, float] = (0.0, 0.0), draw_range_circ = False) -> Sequence[Artist]:
         # https://www.geeksforgeeks.org/python-unzip-a-list-of-tuples/
         x_cords, y_cords = tuple(zip(*self.endpoints(offset)))
-        if prev is None:
-            return ax.plot(x_cords, y_cords, linestyle='solid')
 
-        prev[0].set_data(x_cords, y_cords)
-        return prev
+        toReturn = prev if prev is not None else []
         
+        if prev is None:
+            toReturn = toReturn + ax.plot(x_cords, y_cords, linestyle='solid')
+            if draw_range_circ:
+                ax.plot()
+                toReturn = toReturn + ax.plot(x_cords, y_cords, linestyle='dashed')
+        else:
+            prev[0].set_data(x_cords, y_cords)
+        return toReturn
+    
     def links_sequence(self):
         return zip(self.links, self.angles)
 
+    def _record_history(self):
+        self.angle_history.append(np.array(self.angles))
+
     def set_angles(self, angles: Iterable[float]):
-        self.angles = list(angles)
         assert len(angles) == len(self.links)
+        self.angles = list(angles)
 
     def move_angles(self, angle_changes: Iterable[float]):
         assert len(angle_changes) == len(self.angles)
@@ -110,6 +122,14 @@ class OpenLinkage(Linkage):
         @staticmethod
         def dist(p1: np.array, p2: np.array):
             return np.linalg.norm(p1 - p2)
+
+class OpenLinkageTrajectory(LinkageTrajectory):
+    
+    def push_state(self, angles: Iterable[float]):
+        self.states.append(np.array(angles))
+    
+    def push_cur_state(self, linkage: OpenLinkage):
+        self.push_state(linkage.angles)
     
 if __name__ == "__main__":
 

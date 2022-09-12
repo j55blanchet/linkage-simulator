@@ -5,10 +5,8 @@ import numpy as np
 from matplotlib.lines import Line2D
 
 from ..model.OpenLinkage import OpenLinkage
-from .DriverBase import DriverBase
+from ..drivers.DriverBase import DriverBase
 from ..view.SplineTargetProvider import SplineTargetProvider
-
-
 
 class RetargetingDriver(DriverBase):
 

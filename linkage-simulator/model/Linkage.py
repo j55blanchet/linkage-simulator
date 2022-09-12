@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
 from typing import Sequence, Tuple, Union
 
 import matplotlib.axes
@@ -18,3 +19,10 @@ class Linkage(ABC):
                 -> Sequence[matplotlib.artist.Artist]:
 
         raise NotImplemented()
+
+@dataclass
+class LinkageTrajectory:
+    states = []
+    
+    def clear_states(self):
+        self.states = []
