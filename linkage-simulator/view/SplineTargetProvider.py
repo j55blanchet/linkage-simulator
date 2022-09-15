@@ -7,7 +7,7 @@ MIN_SPLINE_TARGETS = 4
 
 class SplineTargetProvider(TargetProvider):
 
-    def __init__(self, initial_target: np.array = np.array((np.inf, np.inf))) -> None:
+    def __init__(self, initial_target: np.ndarray = np.array((np.inf, np.inf))) -> None:
         self._target = initial_target
         self.targets_x = []
         self.targets_y = []

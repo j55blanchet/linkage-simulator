@@ -22,6 +22,7 @@ class Linkage(ABC):
 
 @dataclass
 class LinkageTrajectory:
+    stateDuration: float = 1 / 30.0
     states = []
     
     def clear_states(self):

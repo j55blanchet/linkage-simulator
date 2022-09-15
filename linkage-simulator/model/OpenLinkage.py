@@ -1,4 +1,4 @@
-from typing import Generator, TypeVar, Iterable, Final, Tuple, Sequence
+from typing import *
 
 import matplotlib
 from matplotlib.artist import Artist
@@ -19,9 +19,24 @@ class OpenLinkage(Linkage):
     def __init__(
         self, 
         link_sizes: Iterable[float], 
-        link_angles: Iterable[float]=None) -> None:
+        link_angles: Union[Iterable[float], None]=None,
+        link_minangles: Union[float, List[float]] = -math.inf,
+        link_maxangles: Union[float, List[float]] = math.inf) -> None:
 
         self.links = tuple(link_sizes)
+        assert len(self.links) > 0
+
+        # test if link_minangles and link_maxangles are iterable
+        try:
+            iter(link_minangles)
+            self.link_minangles = tuple(link_minangles)
+        except TypeError:
+            self.link_minangles = tuple(link_minangles for _ in self.links)
+        try:
+            iter(link_maxangles)
+            self.link_maxangles = tuple(link_maxangles)
+        except TypeError:
+            self.link_maxangles = tuple(link_maxangles for _ in self.links)
         
         if link_angles is None:
             self.angles = [0.0 for _ in self.links]
@@ -29,7 +44,6 @@ class OpenLinkage(Linkage):
             self.angles = list(link_angles)
             assert len(link_angles) == len(self.links)
         
-        assert len(self.links) > 0
     
     def is_closed(self) -> bool:
         x, y = OpenLinkage.Helpers.get_last(self.endpoints())

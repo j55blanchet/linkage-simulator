@@ -7,26 +7,26 @@ from math import pi, sin, cos
 from .LinkageController import OpenLinkage, LinkageController
 
 class DifferentialKinematicOpenLinkageController(LinkageController):
-    MAX_MOVEMENT = 1e9
 
     def __init__(self) -> None:
         pass
 
-    def update(self, linkage: OpenLinkage, target: np.array):
+    def update(self, linkage: OpenLinkage, target: np.array, iterations: int = 1, max_movement: int = 1e9):
 
-        dx, dy = target - linkage.last_endpoint()
-        
-        solution, residuals, rank, s = self.get_solution(linkage, dx, dy)
-        
-        if rank < 2:
-            print("ALERT! Singular config")
+        for _ in range(iterations):
+            dx, dy = target - linkage.last_endpoint()
+            
+            solution, residuals, rank, s = self.get_solution(linkage, dx, dy)
+            
+            if rank < 2:
+                print("ALERT! Singular config")
 
-        solution_norm = np.linalg.norm(solution)
+            solution_norm = np.linalg.norm(solution)
 
-        if solution_norm > DifferentialKinematicOpenLinkageController.MAX_MOVEMENT:
-            solution = solution / solution_norm * DifferentialKinematicOpenLinkageController.MAX_MOVEMENT
-        
-        linkage.move_angles(solution)
+            if solution_norm > max_movement:
+                solution = solution / solution_norm * max_movement
+            
+            linkage.move_angles(solution)
 
     def get_solution(self, linkage: OpenLinkage, dx: float, dy: float):
         jacobian = self.compute_jacobian(linkage)
