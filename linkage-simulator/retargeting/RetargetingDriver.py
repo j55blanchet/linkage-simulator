@@ -26,11 +26,15 @@ class RetargetingDriver(DriverBase):
         self.plot_size = self.calculate_plot_size()
         self.origin_src = self.plot_size[0] / 2, 0.0 # 25% x, center y
         self.origin_dest = self.plot_size[1] / 2, 0.0 # 75% x, center y
-        
+        self.target_provider.src_origin = self.origin_src
+        self.target_provider.add_retargeting(
+            origin=self.origin_dest,
+            scale=self.linkage_dest.length / self.linkage_src.length
+        )
+
         self.ln_linkage_src = None
         self.ln_linkage_dest = None
         self.ln_target_prov = None
-        self.ln_target_prov2 = None
         self.pframe = 0.0
 
     def calculate_plot_size(self) -> Tuple[float, float, float, float]:
@@ -48,16 +52,14 @@ class RetargetingDriver(DriverBase):
     def update(self, frame: float):
         dt = frame - self.pframe
         self.target_provider.update_target(frame, dt)
-        self.retargeting_controller.update_src(frame, self.origin_src)
-        self.retargeting_controller.update_dest(frame, self.origin_src)
+        self.retargeting_controller.update(frame)
         self.pframe = frame
     
     def plot(self, ax) -> Tuple[Line2D]:
         self.ln_linkage_src = self.linkage_src.draw(ax, self.ln_linkage_src, offset=self.origin_src)
         self.ln_linkage_dest = self.linkage_dest.draw(ax, self.ln_linkage_dest, offset=self.origin_dest)
         self.ln_target_prov = self.target_provider.draw(ax, self.ln_target_prov, offset=(0.0, 0.0))
-        self.ln_target_prov2 = self.target_provider.draw(ax, self.ln_target_prov2, offset=[self.plot_size[1], 0.0])
-        return (*self.ln_linkage_src, *self.ln_linkage_dest, *self.ln_target_prov, *self.ln_target_prov2)
+        return (*self.ln_linkage_src, *self.ln_linkage_dest, *self.ln_target_prov)
     
     def mouse_pressed(self, x, y, e):
         print(f"Button Click: {x}, {y}")
@@ -65,9 +67,10 @@ class RetargetingDriver(DriverBase):
         self.retargeting_controller.on_trajectory_changed()
 
 if __name__ == "__main__":
-    from .DiffKinematicsRetargetingController import DiffKinematicsRetargetingController
+    from .EndpointRetargetingController import EndpointRetargetingController
+    from ..controller import DifferentialKinematicOpenLinkageController, IKLinkageController
 
-    ctlr = DiffKinematicsRetargetingController(
+    ctlr = EndpointRetargetingController(
         src_model=OpenLinkage(
             link_sizes=[3.0, 1.0],
             link_angles=[0.36, 0.15],
@@ -76,7 +79,8 @@ if __name__ == "__main__":
             link_sizes=[1.5, 1.5],
             link_angles=[0.36, 0.15],
         ),
-        target_provider=SplineTargetProvider()
+        target_provider=SplineTargetProvider(),
+        linkage_controller=DifferentialKinematicOpenLinkageController(max_movement=1.0, iterations=4),
     )
 
     driver = RetargetingDriver(
@@ -85,11 +89,6 @@ if __name__ == "__main__":
         target_provider=ctlr.target_provider,
         retargeting_controller=ctlr
     )
-
-
-
-
-
 
     driver.target_provider.button_clicked(
         mouse_x=-0.4770967741935479, mouse_y = -0.3996103896103884

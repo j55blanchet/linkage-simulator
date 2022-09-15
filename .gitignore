@@ -141,3 +141,4 @@ cython_debug/
 old-jsproj
 
 *.mp4
+.DS_Store

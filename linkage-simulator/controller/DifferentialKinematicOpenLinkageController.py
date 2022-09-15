@@ -8,12 +8,14 @@ from .LinkageController import OpenLinkage, LinkageController
 
 class DifferentialKinematicOpenLinkageController(LinkageController):
 
-    def __init__(self) -> None:
+    def __init__(self, max_movement = 1e6, iterations = 1) -> None:
+        self.max_movement = max_movement
+        self.iterations = iterations
         pass
 
-    def update(self, linkage: OpenLinkage, target: np.array, iterations: int = 1, max_movement: int = 1e9):
+    def update(self, linkage: OpenLinkage, target: np.array):
 
-        for _ in range(iterations):
+        for _ in range(self.iterations):
             dx, dy = target - linkage.last_endpoint()
             
             solution, residuals, rank, s = self.get_solution(linkage, dx, dy)
@@ -23,8 +25,8 @@ class DifferentialKinematicOpenLinkageController(LinkageController):
 
             solution_norm = np.linalg.norm(solution)
 
-            if solution_norm > max_movement:
-                solution = solution / solution_norm * max_movement
+            if solution_norm > self.max_movement:
+                solution = solution / solution_norm * self.max_movement
             
             linkage.move_angles(solution)
 

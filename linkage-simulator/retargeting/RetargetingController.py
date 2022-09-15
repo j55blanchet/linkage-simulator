@@ -12,9 +12,5 @@ class RetargetingController(ABC):
         pass
 
     @abstractmethod
-    def update_src(self, frame: float, origin: np.ndarray):
-        pass
-
-    @abstractmethod
-    def update_dest(self, frame: float, origin: np.ndarray):
+    def update(self, frame: float):
         pass

@@ -67,6 +67,9 @@ class OpenLinkage(Linkage):
     def links_sequence(self):
         return zip(self.links, self.angles)
 
+    def absolute_angles(self):
+        return np.cumsum(self.angles)
+
     def _record_history(self):
         self.angle_history.append(np.array(self.angles))
 
