@@ -38,12 +38,31 @@ def retarget_trajectory(
     pass
 
 
-class RetargetingController(ABC):
+class OptimizationRetargetingController(RetargetingController):
+    def __init__(
+        self,
+        src_model: OpenLinkage,
+        src_trajectory: LinkageTrajectory,
+        dest_model: OpenLinkage,
+        matched_links: List[Tuple[int, int]],
+        line_primitives: List[LinePrimitive],
+    ):
+        self.src_model = src_model
+        self.src_trajectory = src_trajectory
+        self.dest_model = dest_model
+        self.matched_links = matched_links
+        self.line_primitives = line_primitives
+        self.dest_trajectory = None
 
-    @abstractmethod
     def on_trajectory_changed(self):
-        pass
+        self.dest_trajectory = retarget_trajectory(
+            self.src_model,
+            self.src_trajectory,
+            self.dest_model,
+            self.matched_links,
+            self.line_primitives,
+        )
 
-    @abstractmethod
     def update(self, frame: float):
+        # TODO: set angles to the precalculated angle values
         pass
