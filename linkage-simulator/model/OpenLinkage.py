@@ -21,7 +21,10 @@ class OpenLinkage(Linkage):
         link_sizes: Iterable[float], 
         link_angles: Union[Iterable[float], None]=None,
         link_minangles: Union[float, List[float]] = -math.inf,
-        link_maxangles: Union[float, List[float]] = math.inf) -> None:
+        link_maxangles: Union[float, List[float]] = math.inf,
+        link_maxspeeds: Union[float, List[float]] = math.inf,
+        link_maxaccels: Union[float, List[float]] = math.inf,
+    ) -> None:
 
         self.links = tuple(link_sizes)
         assert len(self.links) > 0
@@ -38,6 +41,18 @@ class OpenLinkage(Linkage):
         except TypeError:
             self.link_maxangles = tuple(link_maxangles for _ in self.links)
         
+        try:
+            iter(link_maxspeeds)
+            self.link_maxspeeds = tuple(link_maxspeeds)
+        except TypeError:
+            self.link_maxspeeds = tuple(link_maxspeeds for _ in self.links)
+
+        try:
+            iter(link_maxaccels)
+            self.link_maxaccels = tuple(link_maxaccels)
+        except TypeError:
+            self.link_maxaccels = tuple(link_maxaccels for _ in self.links)
+
         if link_angles is None:
             self.angles = [0.0 for _ in self.links]
         else:

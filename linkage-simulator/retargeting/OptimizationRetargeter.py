@@ -15,7 +15,7 @@ from ..model import OpenLinkage, LinkageTrajectory
 from ..controller import LinkageController
 from ..view import SplineTargetProvider
 from .RetargetingController import RetargetingController
-from gurobipy import Model, GRB
+import gurobipy
 import numpy as np
 
 @dataclass
@@ -34,10 +34,52 @@ def retarget_trajectory(
     
 ) -> LinkageTrajectory:
 
+    src_links = len(src_model.links)
+    dest_links = len(dest_model.links)
+    state_count = len(src_trajectory.states)
+
+    opt_model = gurobipy.Model('LinkageRetargeting')
+
+    for name, model in [('src', src_model), ('dest', dest_model)]:
+        for t in range(state_count):
+            opt_model.addVars(
+                [
+                    f'{name}-ang-{i}-{t}'
+                    for i in range(model.link_count)
+                ],
+                vtype=gurobipy.GRB.CONTINUOUS,
+                lb=model.link_minangles,
+                ub=model.link_maxangles,
+                obj=0,
+                name=f"{name}-ang-{t}"
+            )
+
+            opt_model.addVars(
+                [
+                    f'{name}-angvel-{i}-{t}'
+                    for i in range(model.link_count)
+                ],
+                vtype=gurobipy.GRB.CONTINUOUS,
+                lb=-model.link_maxspeeds,
+                ub=model.link_maxspeeds,
+                obj=0,
+                name=f"{name}-angvel-{t}"
+            )
+
+            opt_model.addVars(
+                [
+                    f'{name}-angacc-{i}-{t}'
+                    for i in range(model.link_count)
+                ],
+                vtype=gurobipy.GRB.CONTINUOUS,
+                lb=-model.link_maxaccels,
+                ub=model.link_maxaccels,
+                obj=0,
+                name=f"{name}-angacc-{t}"
+            )
 
 
 
-    pass
 
 
 class OptimizationRetargetingController(RetargetingController):
