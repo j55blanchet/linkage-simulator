@@ -12,7 +12,7 @@ class DriverBase(ABC):
         pass
 
     @abstractmethod
-    def update(self, frame: float):
+    def update(self, frame: float, t: float):
         pass
 
     @abstractmethod

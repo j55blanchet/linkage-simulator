@@ -8,9 +8,13 @@ import numpy as np
 class RetargetingController(ABC):
 
     @abstractmethod
-    def on_trajectory_changed(self):
+    def on_effectorpath_changed(self):
         pass
 
     @abstractmethod
-    def update(self, frame: float):
+    def on_trajectory_changed(self, trajectory: LinkageTrajectory):
+        pass
+
+    @abstractmethod
+    def update(self, t: float, target_provider: SplineTargetProvider):
         pass

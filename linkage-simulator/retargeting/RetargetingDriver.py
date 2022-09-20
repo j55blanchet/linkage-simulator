@@ -1,10 +1,11 @@
 from typing import *
 import random
 import math
+from matplotlib.axes import Axes
 import numpy as np
 from matplotlib.lines import Line2D
 
-from ..model.OpenLinkage import OpenLinkage
+from ..model.OpenLinkage import OpenLinkage, OpenLinkageTrajectory
 from ..drivers.DriverBase import DriverBase
 from ..view.SplineTargetProvider import SplineTargetProvider
 
@@ -23,6 +24,9 @@ class RetargetingDriver(DriverBase):
         self.target_provider = target_provider
         self.retargeting_controller = retargeting_controller
 
+        self.src_history = OpenLinkageTrajectory()
+        self.src_history_complete = False
+
         self.plot_size = self.calculate_plot_size()
         self.origin_src = self.plot_size[0] / 2, 0.0 # 25% x, center y
         self.origin_dest = self.plot_size[1] / 2, 0.0 # 75% x, center y
@@ -35,7 +39,8 @@ class RetargetingDriver(DriverBase):
         self.ln_linkage_src = None
         self.ln_linkage_dest = None
         self.ln_target_prov = None
-        self.pframe = 0.0
+        self.pt = 0.0
+        self.pframe = -math.inf
 
     def calculate_plot_size(self) -> Tuple[float, float, float, float]:
         sx_min, sx_max, sy_min, sy_max = self.linkage_src.get_plot_bounds()
@@ -49,44 +54,67 @@ class RetargetingDriver(DriverBase):
     def get_plot_size(self) -> Tuple[float, float, float, float]:
         return self.plot_size
 
-    def update(self, frame: float):
-        dt = frame - self.pframe
-        self.target_provider.update_target(frame, dt)
-        self.retargeting_controller.update(frame)
+    def update(self, frame: float, t: float):
+        dt = t - self.pt
+        self.target_provider.update_target(t, dt)
+        self.retargeting_controller.update(t, self.target_provider)
+        self.pt = t
         self.pframe = frame
+
+        if not self.src_history_complete and frame >= 0.0:
+            self.src_history.push_cur_state(self.linkage_src)
+            if frame >= 1.0:
+                self.src_history.stateDuration = dt % 1
+                self.src_history_complete = True
+                self.retargeting_controller.on_trajectory_changed(self.src_history)
     
-    def plot(self, ax) -> Tuple[Line2D]:
+    def plot(self, ax: Axes) -> Tuple[Line2D]:
         self.ln_linkage_src = self.linkage_src.draw(ax, self.ln_linkage_src, offset=self.origin_src)
         self.ln_linkage_dest = self.linkage_dest.draw(ax, self.ln_linkage_dest, offset=self.origin_dest)
         self.ln_target_prov = self.target_provider.draw(ax, self.ln_target_prov, offset=(0.0, 0.0))
+
+        ax.set_xlabel(f'Frame: {self.pframe:.3f}   t: {self.pt:.3f}  complete: {self.src_history_complete}')
         return (*self.ln_linkage_src, *self.ln_linkage_dest, *self.ln_target_prov)
     
     def mouse_pressed(self, x, y, e):
         print(f"Button Click: {x}, {y}")
         self.target_provider.button_clicked(x, y)
-        self.retargeting_controller.on_trajectory_changed()
+        self.retargeting_controller.on_effectorpath_changed()
 
 if __name__ == "__main__":
     from .EndpointRetargetingController import EndpointRetargetingController
+    from .OptimizationRetargeter import OptimizationRetargetingController
     from ..controller import DifferentialKinematicOpenLinkageController, IKLinkageController
 
-    ctlr = EndpointRetargetingController(
-        src_model=OpenLinkage(
-            link_sizes=[3.0, 1.0],
-            link_angles=[0.36, 0.15],
-        ),
-        dest_model=OpenLinkage(
-            link_sizes=[1.5, 1.5],
-            link_angles=[0.36, 0.15],
-        ),
-        target_provider=SplineTargetProvider(),
-        linkage_controller=DifferentialKinematicOpenLinkageController(max_movement=1.0, iterations=4),
+    src_model=OpenLinkage(
+        link_sizes=[2.2, 1.1],
+        link_angles=[0.36, 0.15],
+    )
+    dest_model=OpenLinkage(
+        link_sizes=[1.5, 1.5],
+        link_angles=[0.36, 0.15],
+    )
+    linkage_controller = IKLinkageController()
+    # linkage_controller = DifferentialKinematicOpenLinkageController(max_movement=1.0, iterations=4),
+
+    # ctlr = EndpointRetargetingController(
+    #     src_model=src_model,
+    #     dest_model=dest_model,
+    #     linkage_controller=linkage_controller,
+    # )
+
+    ctlr = OptimizationRetargetingController(
+        src_model=src_model,
+        src_controller = linkage_controller,
+        dest_model=dest_model,
+        matched_links = [(0, 0), (1, 1)],
+        line_primitives = [],
     )
 
     driver = RetargetingDriver(
         linkage_src=ctlr.src_model,
         linkage_dest=ctlr.dest_model,
-        target_provider=ctlr.target_provider,
+        target_provider=SplineTargetProvider(),
         retargeting_controller=ctlr
     )
 
@@ -103,8 +131,9 @@ if __name__ == "__main__":
         mouse_x=-3.5041935483870965, mouse_y = 1.6536363636363651
     )
 
-    fps = 30
-    frames = np.linspace(0.0, 1.0, fps)
+    fps = 30.0
+    interval = 0.01
+    frames = np.arange(-0.3, 2.7, interval)
     from ..view.PlotAnimator import PlotAnimator
 
     # switch_out = False

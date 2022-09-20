@@ -18,6 +18,8 @@ class SplineTargetProvider(TargetProvider):
         self._retarget_origins = []
         self._retarget_scales = []
         self._retarget_trajectories = []
+        self.path_smoothness = 10
+
     
     def is_valid(self):
         return self.spline_fn is not None
@@ -38,7 +40,6 @@ class SplineTargetProvider(TargetProvider):
         self.click_target = np.array((mouse_x, mouse_y))
 
         if len(self.targets_x) >= MIN_SPLINE_TARGETS:
-            PATH_SMOOTHNESS = 5
             
             splinefn_xs = self.targets_x + self.targets_x[0:2]
             splinefn_ys = self.targets_y + self.targets_y[0:2]
@@ -48,7 +49,7 @@ class SplineTargetProvider(TargetProvider):
             )
 
             splinefn_x = \
-                np.linspace(0, len(self.targets_x), len(self.targets_x) * PATH_SMOOTHNESS)
+                np.linspace(0, len(self.targets_x), len(self.targets_x) * self.path_smoothness)
             xys = self.spline_fn(splinefn_x) \
                     if self.spline_fn is not None\
                     else np.array([[0, 0]])

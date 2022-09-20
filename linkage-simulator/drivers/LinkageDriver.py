@@ -15,17 +15,17 @@ class LinkageDriver(DriverBase):
         self.ln_target = None
         self.ln_controller = None
         self.target_provider = target_provider
-        self.pframe = 0
+        self.pt = 0
 
     def get_plot_size(self) -> Tuple[float, float, float, float]:
         return self.linkage.get_plot_bounds()
 
-    def update(self, frame: float):
-        dframe = frame - self.pframe
-        self.target_provider.update_target(frame, dframe)
+    def update(self, frame: float, t: float):
+        dt = t - self.pt
+        self.target_provider.update_target(t, dt)
         self.controller.update(self.linkage, self.target_provider.target)
-        self.pframe = frame
-        print(f"Frame: {frame}")
+        self.pt = t
+        print(f"Frame: {frame}, {t=}")
         
     def plot(self, ax) -> Tuple[Line2D]:
         self.ln_linkage = self.linkage.draw(ax, self.ln_linkage)

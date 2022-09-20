@@ -12,6 +12,8 @@
 from dataclasses import dataclass
 from typing import *
 from ..model import OpenLinkage, LinkageTrajectory
+from ..controller import LinkageController
+from ..view import SplineTargetProvider
 from .RetargetingController import RetargetingController
 from gurobipy import Model, GRB
 import numpy as np
@@ -42,27 +44,49 @@ class OptimizationRetargetingController(RetargetingController):
     def __init__(
         self,
         src_model: OpenLinkage,
-        src_trajectory: LinkageTrajectory,
+        src_controller: LinkageController,
         dest_model: OpenLinkage,
         matched_links: List[Tuple[int, int]],
         line_primitives: List[LinePrimitive],
     ):
         self.src_model = src_model
-        self.src_trajectory = src_trajectory
+        self.src_controller = src_controller
         self.dest_model = dest_model
         self.matched_links = matched_links
         self.line_primitives = line_primitives
         self.dest_trajectory = None
 
-    def on_trajectory_changed(self):
-        self.dest_trajectory = retarget_trajectory(
-            self.src_model,
-            self.src_trajectory,
-            self.dest_model,
-            self.matched_links,
-            self.line_primitives,
-        )
+    def on_effectorpath_changed(self):
+        # Reset the trajectory - needs to be recalculated
+        self.dest_trajectory = None
+    
+    def on_trajectory_changed(self, trajectory: LinkageTrajectory):
+        # self.dest_trajectory = retarget_trajectory(
+            # self.src_model,
+            # self.src_trajectory,
+            # self.dest_model,
+            # self.matched_links,
+            # self.line_primitives,
+        # )
+        # Simply copy the src trajectory for now
+        self.dest_trajectory = trajectory
 
-    def update(self, frame: float):
+    def update(self, t: float, target_provider: SplineTargetProvider):
+
+        # Update src
+        self.src_controller.update(self.src_model, target_provider.target)
+
+        if self.dest_trajectory is None:
+            return
+        
+        dt = self.dest_trajectory.stateDuration
+        i = int(t / dt)
+        if i >= len(self.dest_trajectory.states):
+            i = len(self.dest_trajectory.states) - 1
+        if i < 0:
+            i = 0
+        
+        state = self.dest_trajectory.states[i]
+
         # TODO: set angles to the precalculated angle values
-        pass
+        self.dest_model.set_angles(state)

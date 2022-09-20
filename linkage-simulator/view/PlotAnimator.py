@@ -12,7 +12,15 @@ from ..drivers.DriverBase import DriverBase
 LinkageDriver = "LinkageDriver"
 
 class PlotAnimator:
-    def __init__(self, driver: DriverBase, frames=None):
+    def __init__(self, driver: DriverBase, frames:np.ndarray=None):
+        """Create a plot animator.
+
+        Args:
+            driver (DriverBase): Module for drawing & updating the plot.
+            frames (np.ndarray, optional): Frames to pass to driver. Convention 
+                will use frames < 0 to setup, frames 0 to 1 as the main time frame,
+                and frames > 1 as repititions.
+        """
         self.driver = driver
         self.frames = frames
 
@@ -30,7 +38,8 @@ class PlotAnimator:
         return artists
 
     def update(self, frame):
-        self.driver.update(frame)
+        t = frame % 1
+        self.driver.update(frame, t)
         artists = self.driver.plot(self.ax)
         return artists
 
