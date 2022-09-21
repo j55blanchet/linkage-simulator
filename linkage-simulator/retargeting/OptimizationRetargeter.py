@@ -44,6 +44,11 @@ def retarget_trajectory(
             time_t_vars = {}
             vars[name].append(time_t_vars)
             
+            # WE DON"T NEED ALL THESE FOR THE SRC VARIABLES!!
+            #   > THE TRAJECTORY IS GIVEN
+            #     VEL & ACC ARE ONLY NEEDED FOR THE DESTINATION
+            #     todo: refactor this out, update the problem statement. 
+            #     goal: have a 2d retargeting demo working by 10am tomorrow.
             time_t_vars['ang'] = opt_model.addVars(
                 [
                     f'{name}-ang-{i}-{t}'
@@ -179,21 +184,31 @@ if __name__ == "__main__":
 
     retargeted_trajectory = retarget_trajectory(
         src_model= OpenLinkage(
-            link_sizes=[1., 1., 1.],
+            link_sizes=[1.],
+            link_angles=[0.],
+            link_minangles=[-np.pi],
+            link_maxangles=[np.pi],
+            link_maxspeeds=[np.pi / 30.],
+            link_maxaccels=[np.pi / 30. / 2.],
         ),
         src_trajectory= LinkageTrajectory(
             stateDuration=1./30.,
             states=[
-                (0., 0., 0.),
-                (0.5, 0.5, 0.5),
-                (1., 1., 1.),
+                (0.,),
+                (0.5,),
+                (1.,),
             ]
         ),
         dest_model= OpenLinkage(
-            link_sizes=[1., 1., 1.],
+            link_sizes=[1.],
+            link_angles=[0.],
+            link_minangles=[-np.pi],
+            link_maxangles=[np.pi],
+            link_maxspeeds=[np.pi / 30.],
+            link_maxaccels=[np.pi / 30. / 2.],
         ),
         matched_links=[
-            (0, 0), (1, 1), (2, 2)
+            (0, 0),
         ],
         line_primitives=[],
     )
