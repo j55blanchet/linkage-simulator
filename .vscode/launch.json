@@ -25,9 +25,14 @@
         {
             "name": "Python: RetargetingDriverTest",
             "type": "python",
-            // "cwd": "${workspaceFolder}",
             "request": "launch",
             "module": "linkage-simulator.retargeting.RetargetingDriver"
+        },
+        {
+            "name": "Python: OptimizationRetargeterTest",
+            "type": "python",
+            "request": "launch",
+            "module": "linkage-simulator.retargeting.OptimizationRetargeter"
         }
     ]
 }

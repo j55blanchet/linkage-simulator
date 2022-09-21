@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
-from typing import Sequence, Tuple, Union
+from dataclasses import dataclass, field
+from typing import Any, List, Sequence, Tuple, Union
 
 import matplotlib.axes
 import matplotlib.artist
@@ -23,7 +23,7 @@ class Linkage(ABC):
 @dataclass
 class LinkageTrajectory:
     stateDuration: float = 1 / 30.0
-    states = []
+    states: List[Any] = field(default_factory=list)
     
     def clear_states(self):
         self.states = []

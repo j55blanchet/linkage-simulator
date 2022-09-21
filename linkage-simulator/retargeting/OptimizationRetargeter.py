@@ -31,56 +31,93 @@ def retarget_trajectory(
     dest_model: OpenLinkage,
     matched_links: List[Tuple[int, int]],
     line_primitives: List[LinePrimitive],
-    
-) -> LinkageTrajectory:
-
-    src_links = len(src_model.links)
-    dest_links = len(dest_model.links)
+):
     state_count = len(src_trajectory.states)
 
     opt_model = gurobipy.Model('LinkageRetargeting')
 
-    for name, model in [('src', src_model), ('dest', dest_model)]:
+    vars = {}
+
+    for name, model, trajectory in [('src', src_model, src_trajectory), ('dest', dest_model, None)]:
+        vars[name] = []
         for t in range(state_count):
-            opt_model.addVars(
+            time_t_vars = {}
+            vars[name].append(time_t_vars)
+            
+            time_t_vars['ang'] = opt_model.addVars(
                 [
                     f'{name}-ang-{i}-{t}'
                     for i in range(model.link_count)
                 ],
                 vtype=gurobipy.GRB.CONTINUOUS,
-                lb=model.link_minangles,
-                ub=model.link_maxangles,
+                lb=trajectory.states[t] if trajectory is not None else model.link_minangles,
+                ub=trajectory.states[t] if trajectory is not None else model.link_maxangles,
                 obj=0,
                 name=f"{name}-ang-{t}"
             )
 
-            opt_model.addVars(
+            time_t_vars['angvel'] = opt_model.addVars(
                 [
                     f'{name}-angvel-{i}-{t}'
                     for i in range(model.link_count)
                 ],
                 vtype=gurobipy.GRB.CONTINUOUS,
-                lb=-model.link_maxspeeds,
+                lb=-np.array(model.link_maxspeeds),
                 ub=model.link_maxspeeds,
                 obj=0,
                 name=f"{name}-angvel-{t}"
             )
 
-            opt_model.addVars(
+            # Variables for 
+            time_t_vars['angacc'] = opt_model.addVars(
                 [
                     f'{name}-angacc-{i}-{t}'
                     for i in range(model.link_count)
                 ],
                 vtype=gurobipy.GRB.CONTINUOUS,
-                lb=-model.link_maxaccels,
+                lb=-np.array(model.link_maxaccels),
                 ub=model.link_maxaccels,
                 obj=0,
                 name=f"{name}-angacc-{t}"
             )
 
+            # Add constraint to link angular velocity and acceleration
+            opt_model.addConstrs(
+                (
+                    time_t_vars['angvel'][f'{name}-angvel-{i}-{t}'] - 
+                    (vars[name][t-1]['angvel'][f'{name}-angvel-{i}-{t - 1}'] if t > 0 else 0.)
+                    ==
+                    (vars[name][t-1]['angacc'][f'{name}-angacc-{i}-{t - 1}'] if t > 0 else 0.)
+                    for i in range(model.link_count)
+                ),
+                name=f"{name}-angvel-angaccel-{t}"
+            )
 
+            # Add constraint to link rotation and angular velocity
+            opt_model.addConstrs(
+                (
+                    time_t_vars['ang'][f'{name}-ang-{i}-{t}'] - 
+                    (vars[name][t-1]['ang'][f'{name}-ang-{i}-{t - 1}'] if t > 0 else 0.)
+                    ==
+                    (vars[name][t-1]['angvel'][f'{name}-angvel-{i}-{t - 1}'] if t > 0 else 0.)
+                    for i in range(model.link_count)
+                ),
+                name=f"{name}-ang-angvel-{t}"
+            )
 
+    opt_model.setObjective(
+        sum([
+            (   vars['src'][t]['ang'][f'src-ang-{src_i}-{t}'] - 
+                vars['dest'][t]['ang'][f'dest-ang-{dest_i}-{t}']
+            )**2
+            for t in range(state_count)
+            for src_i, dest_i in matched_links
+        ]), 
+        gurobipy.GRB.MINIMIZE
+    )
 
+    opt_model.optimize()
+    return opt_model
 
 class OptimizationRetargetingController(RetargetingController):
     def __init__(
@@ -132,3 +169,33 @@ class OptimizationRetargetingController(RetargetingController):
 
         # TODO: set angles to the precalculated angle values
         self.dest_model.set_angles(state)
+
+
+
+if __name__ == "__main__":
+    # TODO: write test case for optimizer.
+    pass
+
+
+    retargeted_trajectory = retarget_trajectory(
+        src_model= OpenLinkage(
+            link_sizes=[1., 1., 1.],
+        ),
+        src_trajectory= LinkageTrajectory(
+            stateDuration=1./30.,
+            states=[
+                (0., 0., 0.),
+                (0.5, 0.5, 0.5),
+                (1., 1., 1.),
+            ]
+        ),
+        dest_model= OpenLinkage(
+            link_sizes=[1., 1., 1.],
+        ),
+        matched_links=[
+            (0, 0), (1, 1), (2, 2)
+        ],
+        line_primitives=[],
+    )
+
+    print(retargeted_trajectory)

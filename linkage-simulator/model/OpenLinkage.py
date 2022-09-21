@@ -120,6 +120,10 @@ class OpenLinkage(Linkage):
     def length(self) -> float:
         return sum(self.links)
 
+    @property
+    def link_count(self) -> int:
+        return len(self.links)
+        
     def __str__(self) -> str:
         return f"Linkage: " + \
             ",".join((
