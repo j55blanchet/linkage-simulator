@@ -73,6 +73,7 @@ class RetargetingDriver(DriverBase):
         self.ln_linkage_dest = self.linkage_dest.draw(ax, self.ln_linkage_dest, offset=self.origin_dest)
         self.ln_target_prov = self.target_provider.draw(ax, self.ln_target_prov, offset=(0.0, 0.0))
 
+        ax.set_title(f'{self.retargeting_controller.__class__.__name__}')
         ax.set_xlabel(f'Frame: {self.pframe:.3f}   t: {self.pt:.3f}  complete: {self.src_history_complete}')
         return (*self.ln_linkage_src, *self.ln_linkage_dest, *self.ln_target_prov)
     
@@ -93,6 +94,10 @@ if __name__ == "__main__":
     dest_model=OpenLinkage(
         link_sizes=[1.5, 1.5],
         link_angles=[0.36, 0.15],
+        link_minangles= [-np.pi, -np.pi / 2],
+        link_maxangles= [np.pi, np.pi / 2],
+        link_maxspeeds= np.pi / 30.,
+        link_maxaccels= np.pi / 30. / 4.,
     )
     linkage_controller = IKLinkageController()
     # linkage_controller = DifferentialKinematicOpenLinkageController(max_movement=1.0, iterations=4),
@@ -150,5 +155,5 @@ if __name__ == "__main__":
     #     driver = LinkageDriver(linkage, path_provider, controller)
 
     animator = PlotAnimator(driver, frames=frames)
-    animator.run(fps, show=False, save=True, repeat=False)
+    animator.run(fps, show=False, save=True, repeat=False, filename=f'{ctlr.__class__.__name__}')
 

@@ -5,6 +5,7 @@ Referenced Code:
 - https://stackoverflow.com/questions/11874767/how-do-i-plot-in-real-time-in-a-while-loop-using-matplotlib
 """
 
+from typing import Union
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
@@ -58,7 +59,7 @@ class PlotAnimator:
         if e.xdata != None and e.ydata != None:
             self.driver.mouse_released(e.xdata, e.ydata, e)
 
-    def run(self, fps: int = 30, show: bool = True, save: bool = False, filename: str = "output", repeat=True):
+    def run(self, fps: int = 30, show: bool = True, save: Union[bool, str] = False, filename: str = "output", repeat=True):
 
         connections = {
             'motion_notify_event': self.on_mouse_move,
@@ -79,12 +80,10 @@ class PlotAnimator:
             blit=True,
             interval=1000 // fps,
             repeat=repeat)
-
         if show:
             plt.show()
 
         for cid in cids:
             self.fig.canvas.mpl_disconnect(cid)
 
-        if save:
-            ani.save(f"{filename}.mp4")
+        ani.save(f"{filename}.mp4")

@@ -36,84 +36,82 @@ def retarget_trajectory(
 
     opt_model = gurobipy.Model('LinkageRetargeting')
 
-    vars = {}
+    vars = []
+    for t in range(state_count):
+        time_t_vars = {}
+        vars.append(time_t_vars)
+        
+        # WE DON"T NEED ALL THESE FOR THE SRC VARIABLES!!
+        #   > THE TRAJECTORY IS GIVEN
+        #     VEL & ACC ARE ONLY NEEDED FOR THE DESTINATION
+        #     todo: refactor this out, update the problem statement. 
+        #     goal: have a 2d retargeting demo working by 10am tomorrow.
+        time_t_vars['ang'] = opt_model.addVars(
+            [
+                f'ang-{i}-{t}'
+                for i in range(dest_model.link_count)
+            ],
+            vtype=gurobipy.GRB.CONTINUOUS,
+            lb=dest_model.link_minangles,
+            ub=dest_model.link_maxangles,
+            obj=0,
+            name=f"ang-{t}"
+        )
 
-    for name, model, trajectory in [('src', src_model, src_trajectory), ('dest', dest_model, None)]:
-        vars[name] = []
-        for t in range(state_count):
-            time_t_vars = {}
-            vars[name].append(time_t_vars)
-            
-            # WE DON"T NEED ALL THESE FOR THE SRC VARIABLES!!
-            #   > THE TRAJECTORY IS GIVEN
-            #     VEL & ACC ARE ONLY NEEDED FOR THE DESTINATION
-            #     todo: refactor this out, update the problem statement. 
-            #     goal: have a 2d retargeting demo working by 10am tomorrow.
-            time_t_vars['ang'] = opt_model.addVars(
-                [
-                    f'{name}-ang-{i}-{t}'
-                    for i in range(model.link_count)
-                ],
-                vtype=gurobipy.GRB.CONTINUOUS,
-                lb=trajectory.states[t] if trajectory is not None else model.link_minangles,
-                ub=trajectory.states[t] if trajectory is not None else model.link_maxangles,
-                obj=0,
-                name=f"{name}-ang-{t}"
-            )
+        time_t_vars['angvel'] = opt_model.addVars(
+            [
+                f'angvel-{i}-{t}'
+                for i in range(dest_model.link_count)
+            ],
+            vtype=gurobipy.GRB.CONTINUOUS,
+            lb=-np.array(dest_model.link_maxspeeds),
+            ub=dest_model.link_maxspeeds,
+            obj=0,
+            name=f"angvel-{t}"
+        )
 
-            time_t_vars['angvel'] = opt_model.addVars(
-                [
-                    f'{name}-angvel-{i}-{t}'
-                    for i in range(model.link_count)
-                ],
-                vtype=gurobipy.GRB.CONTINUOUS,
-                lb=-np.array(model.link_maxspeeds),
-                ub=model.link_maxspeeds,
-                obj=0,
-                name=f"{name}-angvel-{t}"
-            )
+        # Variables for 
+        time_t_vars['angacc'] = opt_model.addVars(
+            [
+                f'angacc-{i}-{t}'
+                for i in range(dest_model.link_count)
+            ],
+            vtype=gurobipy.GRB.CONTINUOUS,
+            lb=-np.array(dest_model.link_maxaccels),
+            ub=dest_model.link_maxaccels,
+            obj=0,
+            name=f"angacc-{t}"
+        )
 
-            # Variables for 
-            time_t_vars['angacc'] = opt_model.addVars(
-                [
-                    f'{name}-angacc-{i}-{t}'
-                    for i in range(model.link_count)
-                ],
-                vtype=gurobipy.GRB.CONTINUOUS,
-                lb=-np.array(model.link_maxaccels),
-                ub=model.link_maxaccels,
-                obj=0,
-                name=f"{name}-angacc-{t}"
-            )
+        # Add constraint to link angular velocity and acceleration
+        opt_model.addConstrs(
+            (
+                time_t_vars['angvel'][f'angvel-{i}-{t}'] - 
+                (vars[t-1]['angvel'][f'angvel-{i}-{t - 1}'] if t > 0 else 0.)
+                ==
+                (vars[t-1]['angacc'][f'angacc-{i}-{t - 1}'] if t > 0 else 0.)
+                for i in range(dest_model.link_count)
+            ),
+            name=f"angvel-angaccel-{t}"
+        )
 
-            # Add constraint to link angular velocity and acceleration
-            opt_model.addConstrs(
-                (
-                    time_t_vars['angvel'][f'{name}-angvel-{i}-{t}'] - 
-                    (vars[name][t-1]['angvel'][f'{name}-angvel-{i}-{t - 1}'] if t > 0 else 0.)
-                    ==
-                    (vars[name][t-1]['angacc'][f'{name}-angacc-{i}-{t - 1}'] if t > 0 else 0.)
-                    for i in range(model.link_count)
-                ),
-                name=f"{name}-angvel-angaccel-{t}"
-            )
-
-            # Add constraint to link rotation and angular velocity
-            opt_model.addConstrs(
-                (
-                    time_t_vars['ang'][f'{name}-ang-{i}-{t}'] - 
-                    (vars[name][t-1]['ang'][f'{name}-ang-{i}-{t - 1}'] if t > 0 else 0.)
-                    ==
-                    (vars[name][t-1]['angvel'][f'{name}-angvel-{i}-{t - 1}'] if t > 0 else 0.)
-                    for i in range(model.link_count)
-                ),
-                name=f"{name}-ang-angvel-{t}"
-            )
+        # Add constraint to link rotation and angular velocity
+        opt_model.addConstrs(
+            (
+                time_t_vars['ang'][f'ang-{i}-{t}'] - 
+                (vars[t-1]['ang'][f'ang-{i}-{t - 1}'] if t > 0 else 0.)
+                ==
+                (vars[t-1]['angvel'][f'angvel-{i}-{t - 1}'] if t > 0 else 0.)
+                for i in range(dest_model.link_count)
+            ),
+            name=f"ang-angvel-{t}"
+        )
 
     opt_model.setObjective(
         sum([
-            (   vars['src'][t]['ang'][f'src-ang-{src_i}-{t}'] - 
-                vars['dest'][t]['ang'][f'dest-ang-{dest_i}-{t}']
+            (   
+                src_trajectory.states[t][src_i] -
+                vars[t]['ang'][f'ang-{dest_i}-{t}']
             )**2
             for t in range(state_count)
             for src_i, dest_i in matched_links
@@ -122,7 +120,21 @@ def retarget_trajectory(
     )
 
     opt_model.optimize()
-    return opt_model
+
+    if opt_model.status != gurobipy.GRB.OPTIMAL:
+        raise Exception(f"Optimization failed with status {opt_model.status}")
+    
+    dest_trajectory = LinkageTrajectory()
+    dest_trajectory.stateDuration = src_trajectory.stateDuration
+    dest_trajectory.states = [
+        [
+            vars[t]['ang'][f'ang-{dest_i}-{t}'].x
+            for dest_i in range(dest_model.link_count)
+        ]
+        for t in range(state_count)
+    ]
+
+    return dest_trajectory
 
 class OptimizationRetargetingController(RetargetingController):
     def __init__(
@@ -145,16 +157,17 @@ class OptimizationRetargetingController(RetargetingController):
         self.dest_trajectory = None
     
     def on_trajectory_changed(self, trajectory: LinkageTrajectory):
-        # self.dest_trajectory = retarget_trajectory(
-            # self.src_model,
-            # self.src_trajectory,
-            # self.dest_model,
-            # self.matched_links,
-            # self.line_primitives,
-        # )
+        self.dest_trajectory = retarget_trajectory(
+            self.src_model,
+            trajectory,
+            self.dest_model,
+            self.matched_links,
+            self.line_primitives,
+        )
+        print("Recalculated src trajectory")
         # Simply copy the src trajectory for now
-        self.dest_trajectory = trajectory
-
+        # self.dest_trajectory = trajectory
+# 
     def update(self, t: float, target_provider: SplineTargetProvider):
 
         # Update src
