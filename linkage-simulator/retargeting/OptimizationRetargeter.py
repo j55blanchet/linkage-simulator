@@ -110,8 +110,8 @@ def retarget_trajectory(
     opt_model.setObjective(
         sum([
             (   
-                src_trajectory.states[t][src_i] -
-                vars[t]['ang'][f'ang-{dest_i}-{t}']
+                sum(src_trajectory.states[t][src_ii] for src_ii in range(src_i + 1)) -
+                sum(vars[t]['ang'][f'ang-{dest_ii}-{t}'] for dest_ii in range(dest_i + 1))
             )**2
             for t in range(state_count)
             for src_i, dest_i in matched_links

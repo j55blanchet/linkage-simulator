@@ -92,10 +92,10 @@ if __name__ == "__main__":
         link_angles=[0.36, 0.15],
     )
     dest_model=OpenLinkage(
-        link_sizes=[1.5, 1.5],
-        link_angles=[0.36, 0.15],
-        link_minangles= [-np.pi, -np.pi / 2],
-        link_maxangles= [np.pi, np.pi / 2],
+        link_sizes=[1.5, 1.0, 1.5],
+        link_angles=[0.36, -0.10, 0.15],
+        link_minangles= [-np.pi, -np.pi, -np.pi / 2],
+        link_maxangles= [np.pi, np.pi, np.pi / 2],
         link_maxspeeds= np.pi / 30.,
         link_maxaccels= np.pi / 30. / 4.,
     )
@@ -112,7 +112,7 @@ if __name__ == "__main__":
         src_model=src_model,
         src_controller = linkage_controller,
         dest_model=dest_model,
-        matched_links = [(0, 0), (1, 1)],
+        matched_links = [(0, 0), (1, 2)],
         line_primitives = [],
     )
 
