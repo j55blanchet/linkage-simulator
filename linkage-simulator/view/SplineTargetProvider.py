@@ -60,7 +60,7 @@ class SplineTargetProvider(TargetProvider):
     def get_full_trajectory(self):
         return self.target_trajectory
     
-    def draw(self, ax: matplotlib.axes.Axes, lines: Tuple[matplotlib.lines.Line2D] = None, offset: Tuple[float, float] = (0.0, 0.0)) -> Tuple[matplotlib.lines.Line2D]:
+    def draw(self, ax: matplotlib.axes.Axes, lines: Tuple[matplotlib.lines.Line2D] = None, offset: Tuple[float, float] = (0.0, 0.0), draw_retarget_traj: bool = False) -> Tuple[matplotlib.lines.Line2D]:
 
         x_verts = self.targets_x + [self._target[0]]
         y_verts = self.targets_y + [self._target[1]]
@@ -85,13 +85,14 @@ class SplineTargetProvider(TargetProvider):
             spline_line.set_data(xys[:, 0], xys[:, 1])
         artists.append(spline_line)
 
-        for retarget_index, retarget_xyz in enumerate(self._retarget_trajectories):
-            if lines is None or len(lines) < (3 + retarget_index):
-                retarget_line = ax.plot(retarget_xyz[:, 0], retarget_xyz[:, 1])[0]
-            else:
-                retarget_line = lines[2 + retarget_index]
-                retarget_line.set_data(retarget_xyz[:, 0], retarget_xyz[:, 1])
-            artists.append(retarget_line)
+        if draw_retarget_traj:
+            for retarget_index, retarget_xyz in enumerate(self._retarget_trajectories):
+                if lines is None or len(lines) < (3 + retarget_index):
+                    retarget_line = ax.plot(retarget_xyz[:, 0], retarget_xyz[:, 1])[0]
+                else:
+                    retarget_line = lines[2 + retarget_index]
+                    retarget_line.set_data(retarget_xyz[:, 0], retarget_xyz[:, 1])
+                artists.append(retarget_line)
 
         return artists
 

@@ -71,7 +71,7 @@ class RetargetingDriver(DriverBase):
     def plot(self, ax: Axes) -> Tuple[Line2D]:
         self.ln_linkage_src = self.linkage_src.draw(ax, self.ln_linkage_src, offset=self.origin_src)
         self.ln_linkage_dest = self.linkage_dest.draw(ax, self.ln_linkage_dest, offset=self.origin_dest)
-        self.ln_target_prov = self.target_provider.draw(ax, self.ln_target_prov, offset=(0.0, 0.0))
+        self.ln_target_prov = self.target_provider.draw(ax, self.ln_target_prov, draw_retarget_traj=False)
 
         ax.set_title(f'{self.retargeting_controller.__class__.__name__}')
         ax.set_xlabel(f'Frame: {self.pframe:.3f}   t: {self.pt:.3f}  complete: {self.src_history_complete}')
@@ -91,14 +91,39 @@ if __name__ == "__main__":
         link_sizes=[2.2, 1.1],
         link_angles=[0.36, 0.15],
     )
+    # dest_model=OpenLinkage(
+    #     link_sizes=[1.5, 1.5],
+    #     link_angles=[0.36, 0.15],
+    #     link_minangles= [-np.pi, -np.pi / 2],
+    #     link_maxangles= [np.pi, np.pi / 2],
+    #     link_maxspeeds= np.pi / 30.,
+    #     link_maxaccels= np.pi / 30. / 4.,
+    # )
+    # matched_links = [(0, 0), (1, 1)]
+    # filename_prefix = ''
+
+    # dest_model=OpenLinkage(
+    #     link_sizes=[1.5, 1.0, 1.5],
+    #     link_angles=[0.36, -0.20, 0.15],
+    #     link_minangles= [-np.pi, -np.pi, -np.pi / 2],
+    #     link_maxangles= [np.pi, np.pi, np.pi / 2],
+    #     link_maxspeeds= np.pi / 30.,
+    #     link_maxaccels= np.pi / 30. / 4.,
+    # )
+    # matched_links = [(0, 0), (1, 2)]
+    # filename_prefix = ''
+
     dest_model=OpenLinkage(
-        link_sizes=[1.5, 1.0, 1.5],
-        link_angles=[0.36, -0.10, 0.15],
-        link_minangles= [-np.pi, -np.pi, -np.pi / 2],
-        link_maxangles= [np.pi, np.pi, np.pi / 2],
-        link_maxspeeds= np.pi / 30.,
-        link_maxaccels= np.pi / 30. / 4.,
+        link_sizes=[1.0, 1.0, 1.0, 1.0],
+        link_angles=[0.3, -0.3, 0.3, -0.3],
+        link_minangles= [-np.pi, -np.pi, -np.pi, -np.pi],
+        link_maxangles= [np.pi, np.pi, np.pi, np.pi],
+        link_maxspeeds= math.inf, #np.pi / 30.,
+        link_maxaccels= np.pi / 30. / 16.,
     )
+    matched_links = [(0, 0), (1, 3)]
+    filename_prefix = 'limitedaccel-'
+
     linkage_controller = IKLinkageController()
     # linkage_controller = DifferentialKinematicOpenLinkageController(max_movement=1.0, iterations=4),
 
@@ -112,9 +137,10 @@ if __name__ == "__main__":
         src_model=src_model,
         src_controller = linkage_controller,
         dest_model=dest_model,
-        matched_links = [(0, 0), (1, 2)],
+        matched_links = matched_links,
         line_primitives = [],
     )
+    filename=f'{filename_prefix}{ctlr.__class__.__name__}-src{src_model.link_count}-dest{dest_model.link_count}'
 
     driver = RetargetingDriver(
         linkage_src=ctlr.src_model,
@@ -155,5 +181,5 @@ if __name__ == "__main__":
     #     driver = LinkageDriver(linkage, path_provider, controller)
 
     animator = PlotAnimator(driver, frames=frames)
-    animator.run(fps, show=False, save=True, repeat=False, filename=f'{ctlr.__class__.__name__}')
+    animator.run(fps, show=False, save=True, repeat=False, filename=filename)
 
